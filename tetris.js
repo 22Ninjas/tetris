@@ -1,8 +1,10 @@
-var _PIXELS_ = 30;
+var _PIXELS_ = 30; //length and width in pixels for a grid space
 var _MAX_INDEX_ = 3; //4th row/col index = 3
 //var _SIZE_ = 4; //4x4 grid that contains pieces
 //var _MAX_ROT_STATE_ = 3; //rotation states: 0, 1, 2, 3
 var _ORIGIN_POS_ = 0.5; //starting pixel position for game (top and left side)
+var _MAX_RIGHT_ = 300.5;
+var _GRID_BOTTOM_ = 600.5;
 //var _POSITION_ = {origin: _ORIGIN_POS_, bottom: _ORIGIN_POS_+(_PIXELS_*_SIZE_), sides: [90.5,210.5]}; //starting position for pieces
 
 
@@ -57,8 +59,8 @@ function oPiece(){
 				  this.gridSize = 2;
 				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
 				  /*coords: _POSITION_,*/
-				  this.startSet = [[0,1,1,0],[0,1,1,0]];
-				  this.currentSet = [[0,1,1,0],[0,1,1,0]];
+				  this.startSet = [[1,1],[1,1]];
+				  this.currentSet = [[1,1],[1,1]];
 				  this.x = 120.5;
 				  this.y = _ORIGIN_POS_;
 				 }
@@ -100,7 +102,7 @@ $(function(){
 	}
 	board_context.strokeStyle = "#eee";
 	board_context.stroke();
-	currentPiece = new tPiece();
+	currentPiece = new iPiece();
 	drawPiece(currentPiece);
 	/*
 	board_context.beginPath();
@@ -161,7 +163,7 @@ function drawPiece(){
 		for(var y = 0; y < currentPiece.gridSize; ++y){
 			if(currentPiece.currentSet[y][x] == 1){
 				board_context.fillStyle = currentPiece.color;
-				board_context.fillRect(currentPiece.x+(30*x), currentPiece.y+(30*y), 30, 30);
+				board_context.fillRect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
 
 			}
 		}
@@ -205,8 +207,8 @@ function rotatePiece(){
 */
 function checkRotation(){
 	var shift = 0;
-	if(currentPiece.x < -0.5){
-		var colOverflow = ((currentPiece.x - 0.5)%30)+1;
+	if(currentPiece.x < -_ORIGIN_POS_){
+		var colOverflow = ((currentPiece.x - _ORIGIN_POS_)%_PIXELS_)+1;
 		for(var col = 0; col < colOverflow; ++col){
 			for(var row = 0; row < currentPiece.gridSize; ++row){
 				if(currentPiece.currentSet[row][col] == 1){
@@ -216,8 +218,9 @@ function checkRotation(){
 			}
 		}
 	}
-	else if(currentPiece.x + (30*currentPiece.gridSize) > 300.5){
-		var colOverflow = (((currentPiece.x + (30*currentPiece.gridSize) - 0.5)%300)+2)%30;
+	else if(currentPiece.x + (_PIXELS_*currentPiece.gridSize) > _MAX_RIGHT_){
+		//var colOverflow = (((currentPiece.x + (30*currentPiece.gridSize) - 0.5)%300)+2)%30;	
+		var colOverflow = (((currentPiece.x + (_PIXELS_*currentPiece.gridSize) - _ORIGIN_POS_)%(_MAX_RIGHT_ - _ORIGIN_POS_))+2)%_PIXELS_;
 		for(var col = currentPiece.gridSize-1; col >= colOverflow; --col){
 			for(var row = 0; row < currentPiece.gridSize; ++row){
 				if(currentPiece.currentSet[row][col] == 1){
@@ -253,9 +256,9 @@ function movePieceSide(direction){
 				}
 			}
 		}
-		if((currentPiece.x - 30) >= (-0.5-(30*emptyCols))){	
+		if((currentPiece.x - _PIXELS_) >= (-_ORIGIN_POS_ - (_PIXELS_*emptyCols))){	
 			clearPiece();
-			currentPiece.x -= 30;
+			currentPiece.x -= _PIXELS_;
 			drawPiece();
 		}
 	}
@@ -276,7 +279,7 @@ function movePieceSide(direction){
 				}
 			}
 		}
-		if((currentPiece.x + 30) <= (210.5+(30*emptyCols))){	
+		if((currentPiece.x + _PIXELS_) <= ((_MAX_RIGHT_ - (_PIXELS_ * currentPiece.gridSize))+(_PIXELS_*emptyCols))){	
 			clearPiece();
 			currentPiece.x += 30;
 			drawPiece();
@@ -300,10 +303,10 @@ function movePieceDown(){
 /*
 	check bottom
 	see if the piece sits on another piece or has reached the bottom of grid
-*/
-function checkBottom(){
-
-}
+*/// 
+// function checkBottom(){
+// 	if(currentPiece.bottom == 
+// }
 /*
 	delete currently drawn piece
 */
