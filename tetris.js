@@ -1,51 +1,64 @@
 var _PIXELS_ = 30;
-var _MAX_INDEX_ = 3;
+var _MAX_INDEX_ = 3; //4th row/col index = 3
 var _SIZE_ = 4; //4x4 grid that contains pieces
 var _ORIGIN_POS_ = 0.5; //starting pixel position for game (top and left side)
-var _POSITION_ = {top: _ORIGIN_POS_, bottom: _ORIGIN_POS_+(_PIXELS_*_SIZE_), sides: [90.5,210.5]}; //starting position for pieces
+//var _POSITION_ = {origin: _ORIGIN_POS_, bottom: _ORIGIN_POS_+(_PIXELS_*_SIZE_), sides: [90.5,210.5]}; //starting position for pieces
 
-var i = {color: '#00ffff' /*cyan*/, coords: _POSITION_, set:[
-							 [0,1,0,0],
-							 [0,1,0,0],
-							 [0,1,0,0],
-							 [0,1,0,0]
-							]};
-var l = {color: '#ff6600' /*orange*/, coords: _POSITION_, set:[
-							  [0,0,0,0],
-							  [0,1,0,0],
-							  [0,1,0,0],
-							  [0,1,1,0]
-							]};
-var j = {color: '#0000ff' /*blue*/, coords: _POSITION_, set:[
-							 [0,0,0,0],
-							 [0,0,1,0],
-							 [0,0,1,0],
-							 [0,1,1,0]
-							]};
-var t = {color: '#9900cc' /*purple*/, coords: _POSITION_, set:[
-							   [0,0,0,0],
-							   [0,1,0,0],
-							   [1,1,1,0],
-							   [0,0,0,0]
-							]};
-var o = {color: '#ffff00' /*yellow*/, coords: _POSITION_, set:[
-							   [0,0,0,0],
-							   [0,1,1,0],
-							   [0,1,1,0],
-							   [0,0,0,0]
-							]};
-var s = {color: '#00ff00' /*green*/, coords: _POSITION_, set:[
-							  [0,0,0,0],
-							  [0,1,1,0],
-							  [1,1,0,0],
-							  [0,0,0,0]
-							]};
-var z = {color: '#ff0000' /*red*/, coords: _POSITION_, set:[
-							 [0,0,0,0],
-							 [1,1,0,0],
-							 [0,1,1,0],
-							 [0,0,0,0]
-							]};
+function iPiece(){
+				  this.color ='#00ffff'; /*cyan*/
+				  this.rotation = 0;
+				  this.gridSize = 4;
+				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  /*coords: _POSITION_,*/ 
+				  this.startSet = [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]];
+				 }
+function lPiece(){
+				  this.color ='#ff6600'; /*orange*/
+				  this.rotation = 0;
+				  this.gridSize = 3;
+				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[0,0,0,0],[0,1,0,0],[0,1,0,0],[0,1,1,0]]
+				 }
+function jPiece(){
+				  this.color = '#0000ff'; /*blue*/
+				  this.rotation = 0;
+				  this.gridSize = 3;
+				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[0,0,0,0],[0,0,1,0],[0,0,1,0],[0,1,1,0]]
+				 }
+function tPiece(){
+				  this.color = '#9900cc'; /*purple*/
+				  this.rotation = 0;
+				  this.gridSize = 3;
+				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[0,0,0,0],[0,1,0,0],[1,1,1,0],[0,0,0,0]]
+				 }
+function oPiece(){
+				  this.color = '#ffff00'; /*yellow*/
+				  this.rotation = 0;
+				  this.gridSize = 2;
+				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]]
+				 }
+function sPiece(){
+				  this.color = '#00ff00'; /*green*/
+				  this.rotation = 0;
+				  this.gridSize = 3;
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[0,0,0,0],[0,1,1,0],[1,1,0,0],[0,0,0,0]]
+				 }
+function zPiece(){
+				  this.color = '#ff0000'; /*red*/
+				  this.rotation = 0;
+				  this.gridSize = 3;
+				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[0,0,0,0],[1,1,0,0],[0,1,1,0],[0,0,0,0]]
+				 }
 
 var board;
 var board_context;
