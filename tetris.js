@@ -159,13 +159,17 @@ function drawPiece(){
 	// console.log(currentPiece.set[1].toString());
 	// console.log(currentPiece.set[2].toString());
 	// console.log(currentPiece.set[3].toString());
+	board_context.beginPath();
 	for(var x = 0; x < currentPiece.gridSize; ++x){
 		for(var y = 0; y < currentPiece.gridSize; ++y){
 			if(currentPiece.currentSet[y][x] == 1){
 				board_context.fillStyle = currentPiece.color;
 				board_context.fillRect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
-
 			}
+			//debugging purposes
+			board_context.rect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
+			board_context.strokeStyle = '#000';
+			board_context.stroke();
 		}
 	}
 };
@@ -196,6 +200,7 @@ function rotatePiece(){
 		}
 	}
 	currentPiece.currentSet = transposed_array;
+	console.log("1: "+currentPiece.x);
 	checkRotation();
 	clearPiece(); //remove the piece in original orientation
 	drawPiece(); //draw the newly rotated piece
@@ -207,8 +212,10 @@ function rotatePiece(){
 */
 function checkRotation(){
 	var shift = 0;
+	console.log("2: "+currentPiece.x);
 	if(currentPiece.x < -_ORIGIN_POS_){
 		var colOverflow = ((currentPiece.x - _ORIGIN_POS_)%_PIXELS_)+1;
+		console.log("overflow var: "+colOverflow);
 		for(var col = 0; col < colOverflow; ++col){
 			for(var row = 0; row < currentPiece.gridSize; ++row){
 				if(currentPiece.currentSet[row][col] == 1){
@@ -217,10 +224,11 @@ function checkRotation(){
 				}
 			}
 		}
+		//debugging
+		console.log("overflow: " + shift);
 	}
 	else if(currentPiece.x + (_PIXELS_*currentPiece.gridSize) > _MAX_RIGHT_){
-		//var colOverflow = (((currentPiece.x + (30*currentPiece.gridSize) - 0.5)%300)+2)%30;	
-		var colOverflow = (((currentPiece.x + (_PIXELS_*currentPiece.gridSize) - _ORIGIN_POS_)%(_MAX_RIGHT_ - _ORIGIN_POS_))+2)%_PIXELS_;
+		var colOverflow = (((currentPiece.x + (_PIXELS_*currentPiece.gridSize) + _ORIGIN_POS_)%(_MAX_RIGHT_ - _ORIGIN_POS_))+1)%_PIXELS_;
 		for(var col = currentPiece.gridSize-1; col >= colOverflow; --col){
 			for(var row = 0; row < currentPiece.gridSize; ++row){
 				if(currentPiece.currentSet[row][col] == 1){
@@ -230,7 +238,9 @@ function checkRotation(){
 			}
 		}
 	}
+	console.log("before: "+currentPiece.x);
 	currentPiece.x += 30*shift;
+	console.log("after: "+currentPiece.x);
 }
 
 /*
@@ -261,6 +271,8 @@ function movePieceSide(direction){
 			currentPiece.x -= _PIXELS_;
 			drawPiece();
 		}
+		//debugging
+		console.log(currentPiece.x);
 	}
 	else if(direction == "right"){
 		while(foundEmptyCol){
