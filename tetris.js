@@ -91,21 +91,41 @@ function zPiece(){
 var board;
 var board_context;
 var currentPiece;
+
+//on page load set up boards
 $(function(){
 	board = document.getElementById("tetrisboard");
 	board_context = board.getContext("2d");
-	board_context.rect(0, 0, $('#tetrisboard').width(), $('tetrisboard').height());
+	board_context.beginPath();
+	board_context.rect(0, 0, $('#tetrisboard').width(), $('#tetrisboard').height());
+	board_context.closePath();
 	board_context.stroke();
 
+	placed_board = document.getElementById("board");
+	placed_context = placed_board.getContext("2d");
+	placed_context.beginPath();
+	placed_context.rect(0, 0, $('#board').width(), $('#board').height());
+	placed_context.closePath();
+	//placed_context.fillStyle ='#0000ff';
+	//placed_context.fillRect(0, 0, $('#board').width(), $('#board').height());
+	placed_context.stroke();
+	
+	board_context.beginPath();
+	//placed_context.beginPath();
 	for(var x = 0.5; x < 300; x+=30){
 		for(var y = 0.5; y < 600; y+=30){
 			board_context.rect(x, y, 30, 30);
+			//placed_context.rect(x, y, 30, 30);
 		}
 	}
+	board_context.closePath();
+	//placed_context.closePath();
 	board_context.strokeStyle = "#eee";
+	//placed_context.strokeStyle = "#eee";
 	board_context.stroke();
-	currentPiece = new iPiece();
-	drawPiece(currentPiece);
+	//placed_context.stroke();
+	nextPiece();
+	drawPiece("board");
 	/*
 	board_context.beginPath();
 	for(var x = 0.5; x < $('#tetrisboard').width(); x+=($('#tetrisboard').width()/10)){
@@ -156,20 +176,34 @@ $(function(){
 /*
 	draw current piece onto grid
 */
-function drawPiece(){
+function drawPiece(contextBoard){
 	// console.log(currentPiece.set[0].toString());
 	// console.log(currentPiece.set[1].toString());
 	// console.log(currentPiece.set[2].toString());
 	// console.log(currentPiece.set[3].toString());
-	board_context.beginPath();
+	if(contextBoard == "placed"){
+		draw_on_context = placed_context;
+	}
+	else if(contextBoard == "board"){
+		draw_on_context = board_context;
+	}
+	else{
+		throw "Error: contextBoard undefined";
+	}
+	draw_on_context.beginPath();
 	for(var x = 0; x < currentPiece.gridSize; ++x){
 		for(var y = 0; y < currentPiece.gridSize; ++y){
 			if(currentPiece.currentSet[y][x] == 1){
-				board_context.fillStyle = currentPiece.color;
-				board_context.fillRect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
+				draw_on_context.fillStyle = currentPiece.color;
+				draw_on_context.fillRect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
 			}
 		}
 	}
+	draw_on_context.closePath();
+	/*if(contextBoard == 'placed'){
+		//nextPiece();
+		drawPiece("board");
+	}*/
 };
 
 /*
@@ -202,7 +236,7 @@ function rotatePiece(){
 	checkRotation();
 	setBottom();
 	clearPiece(); //remove the piece in original orientation
-	drawPiece(); //draw the newly rotated piece
+	drawPiece("board"); //draw the newly rotated piece
 };
 
 /*
@@ -278,7 +312,7 @@ function movePieceSide(direction){
 		if((currentPiece.x - _PIXELS_) >= (-_ORIGIN_POS_ - (_PIXELS_*emptyCols))){	
 			clearPiece();
 			currentPiece.x -= _PIXELS_;
-			drawPiece();
+			drawPiece("board");
 		}
 	}
 	else if(direction == "right"){
@@ -301,7 +335,7 @@ function movePieceSide(direction){
 		if((currentPiece.x + _PIXELS_) <= ((_MAX_RIGHT_ - (_PIXELS_ * currentPiece.gridSize))+(_PIXELS_*emptyCols))){	
 			clearPiece();
 			currentPiece.x += 30;
-			drawPiece();
+			drawPiece("board");
 		}
 	}
 	else{
@@ -314,14 +348,28 @@ function movePieceSide(direction){
 	(should be automatically called ever certain time interval eventually)
 */
 function movePieceDown(){
-	if(!checkBottom()){
+	if(currentPiece.bottom == _GRID_BOTTOM_){
+ 		drawPiece("placed");
+ 		nextPiece();
+ 		drawPiece("board");
+ 	}
+	/*if(!checkBottom()){
 		clearPiece();
 		currentPiece.y += 30;
 		setBottom();
 		drawPiece();
-	}
+	}*/
 	else{
-		nextPiece();
+		if(checkUnder()){
+			drawPiece("placed");
+			nextPiece();
+		}
+		else{
+			clearPiece();
+			currentPiece.y += 30;
+			setBottom();
+			drawPiece("board");
+		}
 	}
 }
 
@@ -342,18 +390,68 @@ function setBottom(){
 
 /*
 	check bottom
-	see if the piece sits on another piece or has reached the bottom of grid
-*/
+	see if the piece sits on bottom of grid
+*
 function checkBottom(){
  	if(currentPiece.bottom == _GRID_BOTTOM_){
  		return true;
  	}
  	else{
  		//check if piece beneath
-
- 		return false;
+		if(checkUnder()){
+			return true;
+		}
+		else{
+ 			return false;
+ 		}
  	}
+ 	return false;
+}*/
+
+/*
+	check under
+	check under piece to see if it sits on another piece
+*/
+function checkUnder(){
+	for(var row = currentPiece.gridSize-1; row >= 0; --row){
+		for(var col = 0; col < currentPiece.gridSize; ++col){
+			if(currentPiece.currentSet[row][col] == 1){
+				if(row < currentPiece.gridSize-1){
+					if(currentPiece.currentSet[row+1][col] != 1){
+						if(checkUnderHelper(col)){
+							return true;
+						}
+					}
+				}
+				else{
+					if(checkUnderHelper(col)){
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
 }
+
+function checkUnderHelper(col){
+	var coordX = currentPiece.x;
+	var coordY = currentPiece.bottom-_PIXELS_;
+	var checkPlacedGrid = placed_context.getImageData(coordX+(_PIXELS_*(col+1)), coordY+_PIXELS_, _PIXELS_, _PIXELS_);
+	if(checkPlacedGrid.data[0] != 0){
+		return true;
+	}
+	else if(checkPlacedGrid.data[1] != 0){
+		return true;
+	}
+	else if(checkPlacedGrid.data[2] != 0){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
 /*
 	delete currently drawn piece
 */
@@ -375,35 +473,34 @@ function clearPiece(){
 function nextPiece(){
 	var allPieces = ["i","j","l","t","o","s","z"];
 	var nextPiece = allPieces[Math.floor(Math.random() * 7)];
-	console.log(nextPiece);
 	switch(nextPiece){
 		case "i":
 			currentPiece = new iPiece();
-			drawPiece();
+			//drawPiece();
 			break;
 		case "j":
 			currentPiece = new jPiece();
-			drawPiece();
+			//drawPiece();
 			break;
 		case "l":
 			currentPiece = new lPiece();
-			drawPiece();
+			//drawPiece();
 			break;
 		case "t":
 			currentPiece = new tPiece();
-			drawPiece();
+			//drawPiece();
 			break;
 		case "o":
 			currentPiece = new oPiece();
-			drawPiece();
+			//drawPiece();
 			break;
 		case "s":
 			currentPiece = new sPiece();
-			drawPiece();
+			//drawPiece();
 			break;
 		case "z":
 			currentPiece = new zPiece();
-			drawPiece();
+			//drawPiece();
 			break;
 		default:
 			throw "Error: could not retrieve next piece";
