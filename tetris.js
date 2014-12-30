@@ -324,6 +324,7 @@ function movePieceDown(){
 		if(checkUnder()){
 			drawPiece("placed");
 			nextPiece();
+			drawPiece("board");
 		}
 		else{
 			clearPiece();
