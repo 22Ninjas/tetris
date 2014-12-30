@@ -13,77 +13,79 @@ function iPiece(){
 				  this.color ='#00ffff'; /*cyan*/
 				  //this.rotation = 0;
 				  this.gridSize = 4;
-				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  this.x = 90.5;
+				  this.y = _ORIGIN_POS_;
+				  this.bottom = this.y+(_PIXELS_*this.gridSize);
 				  /*coords: _POSITION_,*/ 
 				  this.startSet = [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]];
 				  this.currentSet = [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]];
-				  this.x = 90.5;
-				  this.y = _ORIGIN_POS_;
+				  
 				 }
 function lPiece(){
 				  this.color ='#ff6600'; /*orange*/
 				  //this.rotation = 0;
 				  this.gridSize = 3;
-				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  this.x = 120.5;
+				  this.y = _ORIGIN_POS_;
+				  this.bottom = this.y+(_PIXELS_*this.gridSize);
 				  /*coords: _POSITION_,*/
 				  this.startSet = [[1,0,0],[1,0,0],[1,1,0]];
 				  this.currentSet = [[1,0,0],[1,0,0],[1,1,0]];
-				  this.x = 120.5;
-				  this.y = _ORIGIN_POS_;
 				 }
 function jPiece(){
 				  this.color = '#0000ff'; /*blue*/
 				  //this.rotation = 0;
 				  this.gridSize = 3;
-				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  this.x = 90.5;
+  				  this.y = _ORIGIN_POS_;
+				  this.bottom = this.y+(_PIXELS_*this.gridSize);
 				  /*coords: _POSITION_,*/
 				  this.startSet = [[0,0,1],[0,0,1],[0,1,1]];
   				  this.currentSet = [[0,0,1],[0,0,1],[0,1,1]];
-  				  this.x = 90.5;
-  				  this.y = _ORIGIN_POS_;
 				 }
 function tPiece(){
 				  this.color = '#9900cc'; /*purple*/
 				  //this.rotation = 0;
 				  this.gridSize = 3;
-				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
+				  this.x = 90.5;
+				  this.y = _ORIGIN_POS_;
+				  this.bottom = this.y+(_PIXELS_*(this.gridSize-1));
 				  /*coords: _POSITION_,*/
 				  this.startSet = [[0,1,0],[1,1,1],[0,0,0]];
 				  this.currentSet = [[0,1,0],[1,1,1],[0,0,0]];
-				  this.x = 90.5;
-				  this.y = _ORIGIN_POS_;
 				 }
 function oPiece(){
 				  this.color = '#ffff00'; /*yellow*/
 				  //this.rotation = 0;
 				  this.gridSize = 2;
-				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[1,1],[1,1]];
-				  this.currentSet = [[1,1],[1,1]];
 				  this.x = 120.5;
 				  this.y = _ORIGIN_POS_;
+				  this.bottom = this.y+(_PIXELS_*this.gridSize);
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[1,1],[1,1]];
+				  this.currentSet = [[1,1],[1,1]];				  
 				 }
 function sPiece(){
 				  this.color = '#00ff00'; /*green*/
 				  //this.rotation = 0;
 				  this.gridSize = 3;
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[0,1,1],[1,1,0],[0,0,0]];
-				  this.currentSet = [[0,1,1],[1,1,0],[0,0,0]];
 				  this.x = 90.5;
 				  this.y = _ORIGIN_POS_;
+				  this.bottom = this.y+(_PIXELS_*(this.gridSize-1));
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[0,1,1],[1,1,0],[0,0,0]];
+				  this.currentSet = [[0,1,1],[1,1,0],[0,0,0]];				  
 				 }
 function zPiece(){
 				  this.color = '#ff0000'; /*red*/
 				  //this.rotation = 0;
 				  this.gridSize = 3;
-				  this.bottom = _ORIGIN_POS_+(_PIXELS_*this.gridSize);
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[1,1,0],[0,1,1],[0,0,0]];
-				  this.currentSet = [[1,1,0],[0,1,1],[0,0,0]];
 				  this.x = 120.5;
 				  this.y = _ORIGIN_POS_;
+				  this.bottom = this.y+(_PIXELS_*(this.gridSize-1));
+				  /*coords: _POSITION_,*/
+				  this.startSet = [[1,1,0],[0,1,1],[0,0,0]];
+				  this.currentSet = [[1,1,0],[0,1,1],[0,0,0]];				  
 				 }
 
 var board;
@@ -200,7 +202,9 @@ function rotatePiece(){
 		}
 	}
 	currentPiece.currentSet = transposed_array;
+	setBottom();
 	checkRotation();
+	setBottom();
 	clearPiece(); //remove the piece in original orientation
 	drawPiece(); //draw the newly rotated piece
 };
@@ -211,6 +215,7 @@ function rotatePiece(){
 */
 function checkRotation(){
 	var shift = 0;
+	//check left
 	if(currentPiece.x < _ORIGIN_POS_){
 		var colOverflow = (-(currentPiece.x-_ORIGIN_POS_)/_PIXELS_);
 		for(var col = 0; col < colOverflow; ++col){
@@ -221,10 +226,11 @@ function checkRotation(){
 				}
 			}
 		}
+		currentPiece.x += 30*shift;
 	}
-	else if(currentPiece.x + (_PIXELS_*currentPiece.gridSize) > _MAX_RIGHT_){
+	//check right
+	else if(currentPiece.x+(_PIXELS_*currentPiece.gridSize) > _MAX_RIGHT_){
 		var colOverflow = (currentPiece.x+(_PIXELS_*currentPiece.gridSize)-_MAX_RIGHT_)/_PIXELS_;
-		console.log(colOverflow);
 		for(var col = currentPiece.gridSize-1; col >= currentPiece.gridSize-colOverflow; --col){
 			for(var row = 0; row < currentPiece.gridSize; ++row){
 				if(currentPiece.currentSet[row][col] == 1){
@@ -233,8 +239,21 @@ function checkRotation(){
 				}
 			}
 		}
+		currentPiece.x += 30*shift;
 	}
-	currentPiece.x += 30*shift;
+	//check bottom
+	else if(currentPiece.y+(_PIXELS_*currentPiece.gridSize) > _GRID_BOTTOM_){
+		var colOverflow = (currentPiece.y+(_PIXELS_*currentPiece.gridSize)-_GRID_BOTTOM_)/_PIXELS_;
+		for(var row = currentPiece.gridSize-1; row >= currentPiece.gridSize-colOverflow; --row){
+			for(var col = 0; col < currentPiece.gridSize; ++col){
+				if(currentPiece.currentSet[row][col] == 1){
+					shift -= 1;
+					break;
+				}
+			}
+		}
+		currentPiece.y += 30*shift;
+	}
 }
 
 /*
@@ -299,18 +318,41 @@ function movePieceSide(direction){
 	(should be automatically called ever certain time interval eventually)
 */
 function movePieceDown(){
-	clearPiece();
-	currentPiece.y += 30;
-	drawPiece();
+	if(!checkBottom()){
+		clearPiece();
+		currentPiece.y += 30;
+		setBottom();
+		drawPiece();
+	}
+}
+
+/*
+	set bottom
+	set currentPiece.bottom to the bottom of the actual piece, not the grid
+*/
+function setBottom(){
+	for(var row = currentPiece.gridSize-1; row >= 0; --row){
+		for(var col = 0; col < currentPiece.gridSize; ++col){
+			if(currentPiece.currentSet[row][col] == 1){
+				currentPiece.bottom = currentPiece.y+(_PIXELS_*(row+1));
+				return true;
+			}
+		}
+	}
 }
 
 /*
 	check bottom
 	see if the piece sits on another piece or has reached the bottom of grid
-*/// 
-// function checkBottom(){
-// 	if(currentPiece.bottom == 
-// }
+*/
+function checkBottom(){
+ 	if(currentPiece.bottom == _GRID_BOTTOM_){
+ 		return true;
+ 	}
+ 	else{
+ 		return false;
+ 	}
+}
 /*
 	delete currently drawn piece
 */
