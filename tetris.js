@@ -168,10 +168,6 @@ function drawPiece(){
 				board_context.fillStyle = currentPiece.color;
 				board_context.fillRect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
 			}
-			//debugging purposes
-			board_context.rect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
-			board_context.strokeStyle = '#000';
-			board_context.stroke();
 		}
 	}
 };
@@ -324,6 +320,9 @@ function movePieceDown(){
 		setBottom();
 		drawPiece();
 	}
+	else{
+		nextPiece();
+	}
 }
 
 /*
@@ -350,6 +349,8 @@ function checkBottom(){
  		return true;
  	}
  	else{
+ 		//check if piece beneath
+
  		return false;
  	}
 }
@@ -366,4 +367,45 @@ function clearPiece(){
 	}
 	board_context.strokeStyle = "#eee";
 	board_context.stroke();
+}
+
+/*
+	get next piece to play
+*/
+function nextPiece(){
+	var allPieces = ["i","j","l","t","o","s","z"];
+	var nextPiece = allPieces[Math.floor(Math.random() * 7)];
+	console.log(nextPiece);
+	switch(nextPiece){
+		case "i":
+			currentPiece = new iPiece();
+			drawPiece();
+			break;
+		case "j":
+			currentPiece = new jPiece();
+			drawPiece();
+			break;
+		case "l":
+			currentPiece = new lPiece();
+			drawPiece();
+			break;
+		case "t":
+			currentPiece = new tPiece();
+			drawPiece();
+			break;
+		case "o":
+			currentPiece = new oPiece();
+			drawPiece();
+			break;
+		case "s":
+			currentPiece = new sPiece();
+			drawPiece();
+			break;
+		case "z":
+			currentPiece = new zPiece();
+			drawPiece();
+			break;
+		default:
+			throw "Error: could not retrieve next piece";
+	}
 }
