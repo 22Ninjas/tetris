@@ -3,7 +3,7 @@ var _MAX_INDEX_ = 3; //4th row/col index = 3
 var _ORIGIN_POS_ = 0.5; //starting pixel position for game (top and left side)
 var _MAX_RIGHT_ = 300.5;
 var _GRID_BOTTOM_ = 600.5;
-
+var _BUFFER_ = 10; //10 pixel buffer to shrink area when checking if a grid space is taken
 
 //pieces
 function iPiece(){
@@ -127,7 +127,9 @@ $(function(){
 		var code = e.which;
 		switch(code){
 			case 37://left
-				movePieceSide("left");
+				if(!checkSides("left")){
+					movePieceSide("left");
+				}
 				e.preventDefault();
 				break;
 			case 38://up
@@ -135,7 +137,9 @@ $(function(){
 				e.preventDefault();
 				break;
 			case 39://right
-				movePieceSide("right");
+				if(!checkSides("right")){
+					movePieceSide("right");
+				}
 				e.preventDefault();
 				break;
 			case 40://down
@@ -165,12 +169,15 @@ function drawPiece(contextBoard){
 	for(var x = 0; x < currentPiece.gridSize; ++x){
 		for(var y = 0; y < currentPiece.gridSize; ++y){
 			if(currentPiece.currentSet[y][x] == 1){
+				draw_on_context.rect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
 				draw_on_context.fillStyle = currentPiece.color;
 				draw_on_context.fillRect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
 			}
 		}
 	}
 	draw_on_context.closePath();
+	draw_on_context.strokeStyle = "#000";
+	draw_on_context.stroke();
 };
 
 /*
@@ -198,13 +205,32 @@ function rotatePiece(){
 			transposed_array[y][currentPiece.gridSize-1-x] = original_array[x][y];
 		}
 	}
-	currentPiece.currentSet = transposed_array;
-	setBottom();
-	checkRotation();
-	setBottom();
+	if(!checkRotationCollision(transposed_array, currentPiece.y)){
+		currentPiece.currentSet = transposed_array;
+		setBottom();
+		checkRotation();
+		setBottom();
+	}
 	clearPiece(); //remove the piece in original orientation
 	drawPiece("board"); //draw the newly rotated piece
 };
+
+/*
+	check rotation collision
+	check for collision with other pieces after a rotation
+	if there is a collision shift up until playable. if not playable do not rotate
+*/
+function checkRotationCollision(transposed_array, coordY){
+	var offsetX = currentPiece.x + _BUFFER_;
+	var offsetY = coordY + _BUFFER_;
+	
+	for(row = 0; row < currentPiece.gridSize; ++row){
+		for(col = 0; col < currentPiece.gridSize; ++col){
+			if(
+		}
+	}
+	
+}
 
 /*
 	check if rotation goes off board
@@ -212,7 +238,7 @@ function rotatePiece(){
 */
 function checkRotation(){
 	var shift = 0;
-	//check left
+	//check left grid bounds
 	if(currentPiece.x < _ORIGIN_POS_){
 		var colOverflow = (-(currentPiece.x-_ORIGIN_POS_)/_PIXELS_);
 		for(var col = 0; col < colOverflow; ++col){
@@ -225,7 +251,7 @@ function checkRotation(){
 		}
 		currentPiece.x += 30*shift;
 	}
-	//check right
+	//check right grid bounds
 	else if(currentPiece.x+(_PIXELS_*currentPiece.gridSize) > _MAX_RIGHT_){
 		var colOverflow = (currentPiece.x+(_PIXELS_*currentPiece.gridSize)-_MAX_RIGHT_)/_PIXELS_;
 		for(var col = currentPiece.gridSize-1; col >= currentPiece.gridSize-colOverflow; --col){
@@ -238,7 +264,7 @@ function checkRotation(){
 		}
 		currentPiece.x += 30*shift;
 	}
-	//check bottom
+	//check bottom grid bounds
 	else if(currentPiece.y+(_PIXELS_*currentPiece.gridSize) > _GRID_BOTTOM_){
 		var colOverflow = (currentPiece.y+(_PIXELS_*currentPiece.gridSize)-_GRID_BOTTOM_)/_PIXELS_;
 		for(var row = currentPiece.gridSize-1; row >= currentPiece.gridSize-colOverflow; --row){
@@ -255,6 +281,7 @@ function checkRotation(){
 
 /*
 	move piece left and right
+	checks for out of bounds and shifts piece back onto grid if out of bounds detected
 */
 function movePieceSide(direction){
 	var emptyCols = 0;
@@ -311,6 +338,71 @@ function movePieceSide(direction){
 }
 
 /*
+	check sides
+	check for collisions when moving side to side
+*/
+function checkSides(dir){
+	for(col = 0; col < currentPiece.gridSize; ++col){
+		for(row = 0; row < currentPiece.gridSize; ++row){
+			if(dir == "left"){
+				if(currentPiece.currentSet[row][col] == 1){
+					if(col == 0){
+						if(checkSidesHelper(row, col, dir)){ //do not return checkSidesHelper because if false we want to continue.
+							return true;
+						}
+					}
+					else{
+						if(currentPiece.currentSet[row][col-1] != 1){
+							if(checkSidesHelper(row, col, dir)){
+								return true;
+							}
+						}
+					}
+				}
+			}
+			else if(dir == "right"){
+				if(currentPiece.currentSet[row][col] == 1){
+					if(col < currentPiece.gridSize-1){
+						if(currentPiece.currentSet[row][col-1] != 1){
+							if(checkSidesHelper(row, col, dir)){
+								return true;
+							}
+						}
+					}
+					else{
+						if(checkSidesHelper(row, col, dir)){
+							return true;
+						}
+					}
+				}
+			}
+			else{
+				throw "Error: Invalid direction";
+			}
+		}
+	}
+	return false;
+}
+
+/*
+	check sides helper
+	check for piece collision when moving left and right
+*/
+function checkSidesHelper(row, col, dir){
+	//var buffer = 10; //buffer to check smaller area to prevent clipping due to inaccurate line drawing from neighboring spaces
+	if(dir == "right"){
+		var offset = col+1;
+	}
+	if(dir == "left"){
+		var offset = col-1;
+	}
+	var coordX = currentPiece.x+(_PIXELS_*offset)+_BUFFER_;
+	var coordY = currentPiece.y+(_PIXELS_*row)+_BUFFER_;
+	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, buffer, buffer);
+	return checkForColor(checkPlacedGrid);
+}
+
+/*
 	move piece down
 	(should be automatically called ever certain time interval eventually)
 */
@@ -336,21 +428,6 @@ function movePieceDown(){
 }
 
 /*
-	set bottom
-	set currentPiece.bottom to the bottom of the actual piece, not the grid
-*/
-function setBottom(){
-	for(var row = currentPiece.gridSize-1; row >= 0; --row){
-		for(var col = 0; col < currentPiece.gridSize; ++col){
-			if(currentPiece.currentSet[row][col] == 1){
-				currentPiece.bottom = currentPiece.y+(_PIXELS_*(row+1));
-				return true;
-			}
-		}
-	}
-}
-
-/*
 	check under
 	check under piece to see if it sits on another piece
 */
@@ -360,7 +437,7 @@ function checkUnder(){
 			if(currentPiece.currentSet[row][col] == 1){
 				if(row < currentPiece.gridSize-1){
 					if(currentPiece.currentSet[row+1][col] != 1){
-						if(checkUnderHelper(row, col)){
+						if(checkUnderHelper(row, col)){//do not return checkUnderHelper because if false we want to continue.
 							return true;
 						}
 					}
@@ -385,6 +462,14 @@ function checkUnderHelper(row, col){
 	var coordX = currentPiece.x+(_PIXELS_*col)+buffer;
 	var coordY = currentPiece.y+(_PIXELS_*(row+1))+buffer;
 	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, buffer, buffer);
+	return checkForColor(checkPlacedGrid);
+}
+
+/*
+	check for color
+	check if a grid space contains a color (aka a piece)
+*/
+function checkForColor(checkPlacedGrid){
 	if(checkPlacedGrid.data[0] != 0){
 		return true;
 	}
@@ -396,6 +481,21 @@ function checkUnderHelper(row, col){
 	}
 	else{
 		return false;
+	}
+}
+
+/*
+	set bottom
+	set currentPiece.bottom to the bottom of the actual piece, not the grid
+*/
+function setBottom(){
+	for(var row = currentPiece.gridSize-1; row >= 0; --row){
+		for(var col = 0; col < currentPiece.gridSize; ++col){
+			if(currentPiece.currentSet[row][col] == 1){
+				currentPiece.bottom = currentPiece.y+(_PIXELS_*(row+1));
+				return true;
+			}
+		}
 	}
 }
 
