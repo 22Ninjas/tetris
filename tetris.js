@@ -200,7 +200,6 @@ function rotatePiece(){
 		}
 	}
 	currentPiece.currentSet = transposed_array;
-	console.log("1: "+currentPiece.x);
 	checkRotation();
 	clearPiece(); //remove the piece in original orientation
 	drawPiece(); //draw the newly rotated piece
@@ -212,10 +211,8 @@ function rotatePiece(){
 */
 function checkRotation(){
 	var shift = 0;
-	console.log("2: "+currentPiece.x);
-	if(currentPiece.x < -_ORIGIN_POS_){
-		var colOverflow = ((currentPiece.x - _ORIGIN_POS_)%_PIXELS_)+1;
-		console.log("overflow var: "+colOverflow);
+	if(currentPiece.x < _ORIGIN_POS_){
+		var colOverflow = (-(currentPiece.x-_ORIGIN_POS_)/_PIXELS_);
 		for(var col = 0; col < colOverflow; ++col){
 			for(var row = 0; row < currentPiece.gridSize; ++row){
 				if(currentPiece.currentSet[row][col] == 1){
@@ -224,12 +221,11 @@ function checkRotation(){
 				}
 			}
 		}
-		//debugging
-		console.log("overflow: " + shift);
 	}
 	else if(currentPiece.x + (_PIXELS_*currentPiece.gridSize) > _MAX_RIGHT_){
-		var colOverflow = (((currentPiece.x + (_PIXELS_*currentPiece.gridSize) + _ORIGIN_POS_)%(_MAX_RIGHT_ - _ORIGIN_POS_))+1)%_PIXELS_;
-		for(var col = currentPiece.gridSize-1; col >= colOverflow; --col){
+		var colOverflow = (currentPiece.x+(_PIXELS_*currentPiece.gridSize)-_MAX_RIGHT_)/_PIXELS_;
+		console.log(colOverflow);
+		for(var col = currentPiece.gridSize-1; col >= currentPiece.gridSize-colOverflow; --col){
 			for(var row = 0; row < currentPiece.gridSize; ++row){
 				if(currentPiece.currentSet[row][col] == 1){
 					shift -= 1;
@@ -238,9 +234,7 @@ function checkRotation(){
 			}
 		}
 	}
-	console.log("before: "+currentPiece.x);
 	currentPiece.x += 30*shift;
-	console.log("after: "+currentPiece.x);
 }
 
 /*
@@ -271,8 +265,6 @@ function movePieceSide(direction){
 			currentPiece.x -= _PIXELS_;
 			drawPiece();
 		}
-		//debugging
-		console.log(currentPiece.x);
 	}
 	else if(direction == "right"){
 		while(foundEmptyCol){
