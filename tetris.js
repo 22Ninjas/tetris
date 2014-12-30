@@ -1,11 +1,8 @@
 var _PIXELS_ = 30; //length and width in pixels for a grid space
 var _MAX_INDEX_ = 3; //4th row/col index = 3
-//var _SIZE_ = 4; //4x4 grid that contains pieces
-//var _MAX_ROT_STATE_ = 3; //rotation states: 0, 1, 2, 3
 var _ORIGIN_POS_ = 0.5; //starting pixel position for game (top and left side)
 var _MAX_RIGHT_ = 300.5;
 var _GRID_BOTTOM_ = 600.5;
-//var _POSITION_ = {origin: _ORIGIN_POS_, bottom: _ORIGIN_POS_+(_PIXELS_*_SIZE_), sides: [90.5,210.5]}; //starting position for pieces
 
 
 //pieces
@@ -106,8 +103,6 @@ $(function(){
 	placed_context.beginPath();
 	placed_context.rect(0, 0, $('#board').width(), $('#board').height());
 	placed_context.closePath();
-	//placed_context.fillStyle ='#0000ff';
-	//placed_context.fillRect(0, 0, $('#board').width(), $('#board').height());
 	placed_context.stroke();
 	
 	board_context.beginPath();
@@ -115,33 +110,13 @@ $(function(){
 	for(var x = 0.5; x < 300; x+=30){
 		for(var y = 0.5; y < 600; y+=30){
 			board_context.rect(x, y, 30, 30);
-			//placed_context.rect(x, y, 30, 30);
 		}
 	}
 	board_context.closePath();
-	//placed_context.closePath();
 	board_context.strokeStyle = "#eee";
-	//placed_context.strokeStyle = "#eee";
 	board_context.stroke();
-	//placed_context.stroke();
 	nextPiece();
 	drawPiece("board");
-	/*
-	board_context.beginPath();
-	for(var x = 0.5; x < $('#tetrisboard').width(); x+=($('#tetrisboard').width()/10)){
-		board_context.moveTo(x,0);
-		board_context.lineTo(x,$('#tetrisboard').height());
-	}
-	board_context.strokeStyle = "#eee";
-	board_context.stroke();
-	board_context.beginPath();
-	for(var y = 0.5; y < $('#tetrisboard').height(); y+=($('#tetrisboard').height()/20)){
-		board_context.moveTo(0,y);
-		board_context.lineTo($('#tetrisboard').width(),y);
-	}
-	board_context.strokeStyle = "#eee";
-	board_context.stroke();
-	*/
 });
 
 /*
@@ -177,10 +152,6 @@ $(function(){
 	draw current piece onto grid
 */
 function drawPiece(contextBoard){
-	// console.log(currentPiece.set[0].toString());
-	// console.log(currentPiece.set[1].toString());
-	// console.log(currentPiece.set[2].toString());
-	// console.log(currentPiece.set[3].toString());
 	if(contextBoard == "placed"){
 		draw_on_context = placed_context;
 	}
@@ -200,10 +171,6 @@ function drawPiece(contextBoard){
 		}
 	}
 	draw_on_context.closePath();
-	/*if(contextBoard == 'placed'){
-		//nextPiece();
-		drawPiece("board");
-	}*/
 };
 
 /*
@@ -334,7 +301,7 @@ function movePieceSide(direction){
 		}
 		if((currentPiece.x + _PIXELS_) <= ((_MAX_RIGHT_ - (_PIXELS_ * currentPiece.gridSize))+(_PIXELS_*emptyCols))){	
 			clearPiece();
-			currentPiece.x += 30;
+			currentPiece.x += _PIXELS_;
 			drawPiece("board");
 		}
 	}
@@ -353,12 +320,6 @@ function movePieceDown(){
  		nextPiece();
  		drawPiece("board");
  	}
-	/*if(!checkBottom()){
-		clearPiece();
-		currentPiece.y += 30;
-		setBottom();
-		drawPiece();
-	}*/
 	else{
 		if(checkUnder()){
 			drawPiece("placed");
@@ -389,26 +350,6 @@ function setBottom(){
 }
 
 /*
-	check bottom
-	see if the piece sits on bottom of grid
-*
-function checkBottom(){
- 	if(currentPiece.bottom == _GRID_BOTTOM_){
- 		return true;
- 	}
- 	else{
- 		//check if piece beneath
-		if(checkUnder()){
-			return true;
-		}
-		else{
- 			return false;
- 		}
- 	}
- 	return false;
-}*/
-
-/*
 	check under
 	check under piece to see if it sits on another piece
 */
@@ -418,13 +359,13 @@ function checkUnder(){
 			if(currentPiece.currentSet[row][col] == 1){
 				if(row < currentPiece.gridSize-1){
 					if(currentPiece.currentSet[row+1][col] != 1){
-						if(checkUnderHelper(col)){
+						if(checkUnderHelper(row, col)){
 							return true;
 						}
 					}
 				}
 				else{
-					if(checkUnderHelper(col)){
+					if(checkUnderHelper(row, col)){
 						return true;
 					}
 				}
@@ -434,10 +375,15 @@ function checkUnder(){
 	return false;
 }
 
-function checkUnderHelper(col){
-	var coordX = currentPiece.x;
-	var coordY = currentPiece.bottom-_PIXELS_;
-	var checkPlacedGrid = placed_context.getImageData(coordX+(_PIXELS_*(col+1)), coordY+_PIXELS_, _PIXELS_, _PIXELS_);
+/*
+	check under helper
+	check grid space under piece to see if it contains a color (denotes a piece is occupying that space)
+*/
+function checkUnderHelper(row, col){
+	var buffer = 10; //buffer to check smaller area to prevent clipping due to inaccurate line drawing from neighboring spaces
+	var coordX = currentPiece.x+(_PIXELS_*col)+buffer;
+	var coordY = currentPiece.y+(_PIXELS_*(row+1))+buffer;
+	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, buffer, buffer);
 	if(checkPlacedGrid.data[0] != 0){
 		return true;
 	}
