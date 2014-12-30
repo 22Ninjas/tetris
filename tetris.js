@@ -205,13 +205,18 @@ function rotatePiece(){
 			transposed_array[y][currentPiece.gridSize-1-x] = original_array[x][y];
 		}
 	}
+	var origin_y = currentPiece.y;
 	if(!checkRotationCollision(transposed_array, currentPiece.y)){
+		console.log("passed check");
 		currentPiece.currentSet = transposed_array;
 		setBottom();
 		checkRotation();
 		setBottom();
+		clearPiece(); //remove the piece in original orientation
 	}
-	clearPiece(); //remove the piece in original orientation
+	else{
+		currentPiece.y = origin_y; //reset y coord.
+	}
 	drawPiece("board"); //draw the newly rotated piece
 };
 
@@ -223,13 +228,26 @@ function rotatePiece(){
 function checkRotationCollision(transposed_array, coordY){
 	var offsetX = currentPiece.x + _BUFFER_;
 	var offsetY = coordY + _BUFFER_;
-	
+	var coordX = currentPiece.x;
+	var checkPlacedGrid;
 	for(row = 0; row < currentPiece.gridSize; ++row){
 		for(col = 0; col < currentPiece.gridSize; ++col){
-			if(
+			coordX += (_PIXELS_*col)+_BUFFER_;
+			coordY += (_PIXELS_*(row+1))+_BUFFER_;
+			checkPlacedGrid = placed_context.getImageData(coordX, coordY, _BUFFER_, _BUFFER_);
+			if(checkForColor(checkPlacedGrid) && (currentPiece.currentSet[row][col] == 1)){
+				console.log("collision");
+				if((coordY - _PIXELS_ < _ORIGIN_POS_)){
+					return true;
+				}
+				else{
+					return checkRotationCollision(transposed_array, coordY - _PIXELS_);
+				}
+			}
 		}
 	}
-	
+	currentPiece.y = coordY;
+	return false;
 }
 
 /*
@@ -398,7 +416,7 @@ function checkSidesHelper(row, col, dir){
 	}
 	var coordX = currentPiece.x+(_PIXELS_*offset)+_BUFFER_;
 	var coordY = currentPiece.y+(_PIXELS_*row)+_BUFFER_;
-	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, buffer, buffer);
+	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, _BUFFER_, _BUFFER_);
 	return checkForColor(checkPlacedGrid);
 }
 
@@ -458,10 +476,9 @@ function checkUnder(){
 	check grid space under piece to see if it contains a color (denotes a piece is occupying that space)
 */
 function checkUnderHelper(row, col){
-	var buffer = 10; //buffer to check smaller area to prevent clipping due to inaccurate line drawing from neighboring spaces
-	var coordX = currentPiece.x+(_PIXELS_*col)+buffer;
-	var coordY = currentPiece.y+(_PIXELS_*(row+1))+buffer;
-	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, buffer, buffer);
+	var coordX = currentPiece.x+(_PIXELS_*col)+_BUFFER_;
+	var coordY = currentPiece.y+(_PIXELS_*(row+1))+_BUFFER_;
+	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, _BUFFER_, _BUFFER_);
 	return checkForColor(checkPlacedGrid);
 }
 
