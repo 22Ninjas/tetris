@@ -181,10 +181,11 @@ function drawPiece(contextBoard){
 };
 
 /*
-	rotate the piece
+	create transpose array
+	create array of transposed (rotated) original array
 */
-function rotatePiece(){
-	var original_array = currentPiece.currentSet;
+function createTransposeArray(origArray){
+	var original_array = origArray;
 	var transposed_array = [];
 	for(var rows = 0; rows < currentPiece.gridSize; ++rows){
 		if(currentPiece.gridSize == 4){
@@ -205,6 +206,13 @@ function rotatePiece(){
 			transposed_array[y][currentPiece.gridSize-1-x] = original_array[x][y];
 		}
 	}
+	return transposed_array;
+}
+/*
+	rotate the piece
+*/
+function rotatePiece(){
+	var transposed_array = createTransposeArray(currentPiece.currentSet);
 	var origin_y = currentPiece.y;
 	if(!checkRotationCollision(transposed_array)){
 		console.log("passed check");
@@ -213,9 +221,6 @@ function rotatePiece(){
 		checkRotation();
 		setBottom();
 	}
-	else{
-		currentPiece.y = origin_y; //reset y coord.
-	}
 	clearPiece(); //remove the piece in original orientation
 	drawPiece("board"); //draw the newly rotated piece
 };
@@ -223,19 +228,16 @@ function rotatePiece(){
 /*
 	check rotation collision
 	check for collision with other pieces after a rotation
-	if there is a collision shift up until playable. if not playable do not rotate
 */
 function checkRotationCollision(transposed_array){
+	//var trans_array = createTransposeArray(transposed_array);
 	var offsetX = currentPiece.x + _BUFFER_;
 	var offsetY = currentPiece.y + _BUFFER_;
-	// var coordX = currentPiece.x;
-	// var checkPlacedGrid;
+	//console.log(transposed_array[3].toString());
 	for(row = 0; row < currentPiece.gridSize; ++row){
 	 	for(col = 0; col < currentPiece.gridSize; ++col){
 	 		checkPlacedGrid = placed_context.getImageData(offsetX+(_PIXELS_*row), offsetY+(_PIXELS_*col), _BUFFER_, _BUFFER_);
-	 		console.log(row + ":" + offsetX);
-	 		console.log(col + ":" + offsetY);
-	 		if(checkForColor(checkPlacedGrid) && (currentPiece.currentSet[row][col] == 1)){
+	 		if(checkForColor(checkPlacedGrid) && (transposed_array[col][row] == 1)){
 	 			return true;
 	 		}
 	 	}
@@ -374,7 +376,7 @@ function checkSides(dir){
 			else if(dir == "right"){
 				if(currentPiece.currentSet[row][col] == 1){
 					if(col < currentPiece.gridSize-1){
-						if(currentPiece.currentSet[row][col-1] != 1){
+						if(currentPiece.currentSet[row][col+1] != 1){
 							if(checkSidesHelper(row, col, dir)){
 								return true;
 							}
