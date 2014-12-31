@@ -119,10 +119,10 @@ $(function(){
 	placed_context.stroke();
 	
 	board_context.beginPath();
-	//placed_context.beginPath();
-	for(var x = 0.5; x < 300; x+=30){
-		for(var y = 0.5; y < 600; y+=30){
-			board_context.rect(x, y, 30, 30);
+	
+	for(var x = _ORIGIN_POS_; x < _MAX_RIGHT_-_ORIGIN_POS_; x+=_PIXELS_){
+		for(var y = _ORIGIN_POS_; y < _GRID_BOTTOM_; y+=_PIXELS_){
+			board_context.rect(x, y, _PIXELS_, _PIXELS_);
 		}
 	}
 	board_context.closePath();
@@ -249,7 +249,7 @@ function checkRotationCollision(transposed_array){
 	//console.log(transposed_array[3].toString());
 	for(row = 0; row < currentPiece.gridSize; ++row){
 	 	for(col = 0; col < currentPiece.gridSize; ++col){
-	 		checkPlacedGrid = placed_context.getImageData(offsetX+(_PIXELS_*row), offsetY+(_PIXELS_*col), _BUFFER_, _BUFFER_);
+	 		var checkPlacedGrid = placed_context.getImageData(offsetX+(_PIXELS_*row), offsetY+(_PIXELS_*col), _BUFFER_, _BUFFER_);
 	 		if(checkForColor(checkPlacedGrid) && (transposed_array[col][row] == 1)){
 	 			return true;
 	 		}
@@ -435,12 +435,14 @@ function checkSidesHelper(row, col, dir){
 function movePieceDown(){
 	if(currentPiece.bottom == _GRID_BOTTOM_){
  		drawPiece("placed");
+ 		getLineRows();
  		nextPiece();
  		drawPiece("board");
  	}
 	else{
 		if(checkUnder()){
 			drawPiece("placed");
+			getLineRows();
 			nextPiece();
 			drawPiece("board");
 		}
@@ -491,6 +493,57 @@ function checkUnderHelper(row, col){
 }
 
 /*
+	get line rows
+	get the rows the piece was just played in to check for completed lines
+*/
+function getLineRows(){
+	var checkLines = [];
+	for(var row = 0; row < currentPiece.gridSize; ++row){
+		for(var col = 0; col < currentPiece.gridSize; ++col){
+			if(currentPiece.currentSet[row][col] == 1){
+				checkLines.push(currentPiece.y+(_PIXELS_*row));
+				break;
+			}
+		}
+	}
+	console.log(checkLines.toString());
+	checkRowForLine(checkLines);
+}
+
+
+/*
+	check row for line
+	check given rows to see if they are completed lines
+*/
+function checkRowForLine(lines){
+console.log("here " + lines.toString());
+	var boardWidth = (_MAX_RIGHT_ - _ORIGIN_POS_)/_PIXELS_;
+	console.log(boardWidth);
+	for(var i = 0; i < lines.length; ++i){
+		var filledSpaces = 0;
+		for(var y = 0; y < boardWidth; ++y){
+		console.log("coords: "+Number(_BUFFER_+(_PIXELS_*y))+ ", "+lines[i]);
+			var checkPlacedGrid = placed_context.getImageData(_BUFFER_+(_PIXELS_*y), lines[i]+_BUFFER_, _BUFFER_, _BUFFER_);
+			if(checkForColor(checkPlacedGrid)){
+				console.log("found filled");
+				filledSpaces += 1;
+			}
+		}
+		if(filledSpaces == boardWidth){
+			placed_context.beginPath();
+			for(var r = 0; r < boardWidth; ++r){
+				placed_context.rect(_ORIGIN_POS_+(_PIXELS_*r), lines[i], _PIXELS_+1, _PIXELS_+1);
+				placed_context.fillStyle = '#ffffff';
+				placed_context.fillRect(_ORIGIN_POS_+(_PIXELS_*r), lines[i], _PIXELS_+1, _PIXELS_+1);
+			}
+			placed_context.closePath()
+			placed_context.strokeStyle = '#eee';
+			placed_context.stroke();
+		}
+	}
+}
+
+/*
 	check for color
 	check if a grid space contains a color (aka a piece)
 */
@@ -530,9 +583,9 @@ function setBottom(){
 function clearPiece(){
 	for(var i = 0; i < currentPiece.gridSize; ++i){
 		for(var j = 0; j < currentPiece.gridSize; ++j){
-			board_context.rect(currentPiece.x+(30*i), currentPiece.y+(30*j), 30, 30);
+			board_context.rect(currentPiece.x+(_PIXELS_*i), currentPiece.y+(_PIXELS_*j), _PIXELS_, _PIXELS_);
 			board_context.fillStyle = '#ffffff';
-			board_context.fillRect(currentPiece.x+(30*i), currentPiece.y+(30*j), 30, 30);
+			board_context.fillRect(currentPiece.x+(_PIXELS_*i), currentPiece.y+(_PIXELS_*j), _PIXELS_, _PIXELS_);
 		}
 	}
 	board_context.strokeStyle = "#eee";
@@ -543,7 +596,7 @@ function clearPiece(){
 	get next piece to play
 */
 function nextPiece(){
-	if(arrayLength == 0){
+	if(_UNPLAYED_PIECES_ == 0){
 		_UNPLAYED_PIECES_ = new Array(_NEXT_PIECE_ARRAY_.length);
 		for(var x = 0; x < _NEXT_PIECE_ARRAY_.length; ++x){
 			_UNPLAYED_PIECES_[x] = _NEXT_PIECE_ARRAY_[x];
