@@ -206,17 +206,17 @@ function rotatePiece(){
 		}
 	}
 	var origin_y = currentPiece.y;
-	if(!checkRotationCollision(transposed_array, currentPiece.y)){
+	if(!checkRotationCollision(transposed_array)){
 		console.log("passed check");
 		currentPiece.currentSet = transposed_array;
 		setBottom();
 		checkRotation();
 		setBottom();
-		clearPiece(); //remove the piece in original orientation
 	}
 	else{
 		currentPiece.y = origin_y; //reset y coord.
 	}
+	clearPiece(); //remove the piece in original orientation
 	drawPiece("board"); //draw the newly rotated piece
 };
 
@@ -225,28 +225,21 @@ function rotatePiece(){
 	check for collision with other pieces after a rotation
 	if there is a collision shift up until playable. if not playable do not rotate
 */
-function checkRotationCollision(transposed_array, coordY){
+function checkRotationCollision(transposed_array){
 	var offsetX = currentPiece.x + _BUFFER_;
-	var offsetY = coordY + _BUFFER_;
-	var coordX = currentPiece.x;
-	var checkPlacedGrid;
+	var offsetY = currentPiece.y + _BUFFER_;
+	// var coordX = currentPiece.x;
+	// var checkPlacedGrid;
 	for(row = 0; row < currentPiece.gridSize; ++row){
-		for(col = 0; col < currentPiece.gridSize; ++col){
-			coordX += (_PIXELS_*col)+_BUFFER_;
-			coordY += (_PIXELS_*(row+1))+_BUFFER_;
-			checkPlacedGrid = placed_context.getImageData(coordX, coordY, _BUFFER_, _BUFFER_);
-			if(checkForColor(checkPlacedGrid) && (currentPiece.currentSet[row][col] == 1)){
-				console.log("collision");
-				if((coordY - _PIXELS_ < _ORIGIN_POS_)){
-					return true;
-				}
-				else{
-					return checkRotationCollision(transposed_array, coordY - _PIXELS_);
-				}
-			}
-		}
+	 	for(col = 0; col < currentPiece.gridSize; ++col){
+	 		checkPlacedGrid = placed_context.getImageData(offsetX+(_PIXELS_*row), offsetY+(_PIXELS_*col), _BUFFER_, _BUFFER_);
+	 		console.log(row + ":" + offsetX);
+	 		console.log(col + ":" + offsetY);
+	 		if(checkForColor(checkPlacedGrid) && (currentPiece.currentSet[row][col] == 1)){
+	 			return true;
+	 		}
+	 	}
 	}
-	currentPiece.y = coordY;
 	return false;
 }
 
