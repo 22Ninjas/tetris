@@ -4,7 +4,20 @@ var _ORIGIN_POS_ = 0.5; //starting pixel position for game (top and left side)
 var _MAX_RIGHT_ = 300.5;
 var _GRID_BOTTOM_ = 600.5;
 var _BUFFER_ = 10; //10 pixel buffer to shrink area when checking if a grid space is taken
-
+var _NEXT_PIECE_ARRAY_ = ["i","i","i","i",
+					 "j","j","j","j",
+					 "l","l","l","l",
+					 "t","t","t","t",
+					 "o","o","o","o",
+					 "s","s","s","s",
+					 "z","z","z","z"]; //guarantees at least 4 instances of a piece each 28 moves.
+var _UNPLAYED_PIECES_ = ["i","i","i","i",
+					 "j","j","j","j",
+					 "l","l","l","l",
+					 "t","t","t","t",
+					 "o","o","o","o",
+					 "s","s","s","s",
+					 "z","z","z","z"]; //unplayed pieces
 //pieces
 function iPiece(){
 				  this.color ='#00ffff'; /*cyan*/
@@ -530,8 +543,16 @@ function clearPiece(){
 	get next piece to play
 */
 function nextPiece(){
-	var allPieces = ["i","j","l","t","o","s","z"];
-	var nextPiece = allPieces[Math.floor(Math.random() * 7)];
+	if(arrayLength == 0){
+		_UNPLAYED_PIECES_ = new Array(_NEXT_PIECE_ARRAY_.length);
+		for(var x = 0; x < _NEXT_PIECE_ARRAY_.length; ++x){
+			_UNPLAYED_PIECES_[x] = _NEXT_PIECE_ARRAY_[x];
+		}
+	}
+	var arrayLength = _UNPLAYED_PIECES_.length;
+	var indexNextPiece = Math.floor(Math.random()*arrayLength);
+	var nextPiece = _UNPLAYED_PIECES_[indexNextPiece];
+	_UNPLAYED_PIECES_.splice(indexNextPiece,1);
 	switch(nextPiece){
 		case "i":
 			currentPiece = new iPiece();
