@@ -435,14 +435,23 @@ function checkSidesHelper(row, col, dir){
 function movePieceDown(){
 	if(currentPiece.bottom == _GRID_BOTTOM_){
  		drawPiece("placed");
- 		getLineRows();
+ 		var rows = getLineRows();
+		var deleteRows = checkRowForLine(rows);
+		if(deleteRows.length != 0){
+			clearLines(deleteRows);
+			shiftBoard
+		}
  		nextPiece();
  		drawPiece("board");
  	}
 	else{
 		if(checkUnder()){
 			drawPiece("placed");
-			getLineRows();
+			var rows = getLineRows();
+			var deleteRows = checkRowForLine(rows);
+			if(deleteRows.length != 0){
+				clearLines(deleteRows);
+			}
 			nextPiece();
 			drawPiece("board");
 		}
@@ -506,43 +515,49 @@ function getLineRows(){
 			}
 		}
 	}
-	console.log(checkLines.toString());
-	checkRowForLine(checkLines);
+	return checkLines;
 }
-
 
 /*
 	check row for line
 	check given rows to see if they are completed lines
 */
 function checkRowForLine(lines){
-console.log("here " + lines.toString());
 	var boardWidth = (_MAX_RIGHT_ - _ORIGIN_POS_)/_PIXELS_;
-	console.log(boardWidth);
+	var linesToDel = [];
 	for(var i = 0; i < lines.length; ++i){
 		var filledSpaces = 0;
 		for(var y = 0; y < boardWidth; ++y){
-		console.log("coords: "+Number(_BUFFER_+(_PIXELS_*y))+ ", "+lines[i]);
 			var checkPlacedGrid = placed_context.getImageData(_BUFFER_+(_PIXELS_*y), lines[i]+_BUFFER_, _BUFFER_, _BUFFER_);
 			if(checkForColor(checkPlacedGrid)){
-				console.log("found filled");
 				filledSpaces += 1;
 			}
 		}
 		if(filledSpaces == boardWidth){
-			placed_context.beginPath();
-			for(var r = 0; r < boardWidth; ++r){
-				placed_context.rect(_ORIGIN_POS_+(_PIXELS_*r), lines[i], _PIXELS_+1, _PIXELS_+1);
-				placed_context.fillStyle = '#ffffff';
-				placed_context.fillRect(_ORIGIN_POS_+(_PIXELS_*r), lines[i], _PIXELS_+1, _PIXELS_+1);
-			}
-			placed_context.closePath()
-			placed_context.strokeStyle = '#eee';
-			placed_context.stroke();
+			linesToDel.push(lines[i]);
 		}
 	}
+	return linesToDel;
 }
 
+/*
+	clear lines
+	clear found lines
+*/
+function clearLines(deleteLines){
+	var boardWidth = (_MAX_RIGHT_ - _ORIGIN_POS_)/_PIXELS_;
+	for(var row = 0; row < deleteLines.length; ++row){
+		placed_context.beginPath();
+		for(var r = 0; r < boardWidth; ++r){
+			placed_context.rect(_ORIGIN_POS_+(_PIXELS_*r), deleteLines[row], _PIXELS_+1, _PIXELS_+1);
+			placed_context.fillStyle = '#ffffff';
+			placed_context.fillRect(_ORIGIN_POS_+(_PIXELS_*r), deleteLines[row], _PIXELS_+1, _PIXELS_+1);
+		}
+		placed_context.closePath()
+		placed_context.strokeStyle = '#eee';
+		placed_context.stroke();
+	}
+}
 /*
 	check for color
 	check if a grid space contains a color (aka a piece)
