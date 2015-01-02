@@ -18,89 +18,16 @@ var _UNPLAYED_PIECES_ = ["i","i","i","i",
 					 "o","o","o","o",
 					 "s","s","s","s",
 					 "z","z","z","z"]; //unplayed pieces
-//pieces
-function iPiece(){
-				  this.color ='#00ffff'; /*cyan*/
-				  //this.rotation = 0;
-				  this.gridSize = 4;
-				  this.x = 90.5;
-				  this.y = _ORIGIN_POS_;
-				  this.bottom = this.y+(_PIXELS_*this.gridSize);
-				  /*coords: _POSITION_,*/ 
-				  this.startSet = [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]];
-				  this.currentSet = [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]];
-				  
-				 }
-function lPiece(){
-				  this.color ='#ff6600'; /*orange*/
-				  //this.rotation = 0;
-				  this.gridSize = 3;
-				  this.x = 120.5;
-				  this.y = _ORIGIN_POS_;
-				  this.bottom = this.y+(_PIXELS_*this.gridSize);
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[1,0,0],[1,0,0],[1,1,0]];
-				  this.currentSet = [[1,0,0],[1,0,0],[1,1,0]];
-				 }
-function jPiece(){
-				  this.color = '#0000ff'; /*blue*/
-				  //this.rotation = 0;
-				  this.gridSize = 3;
-				  this.x = 90.5;
-  				  this.y = _ORIGIN_POS_;
-				  this.bottom = this.y+(_PIXELS_*this.gridSize);
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[0,0,1],[0,0,1],[0,1,1]];
-  				  this.currentSet = [[0,0,1],[0,0,1],[0,1,1]];
-				 }
-function tPiece(){
-				  this.color = '#9900cc'; /*purple*/
-				  //this.rotation = 0;
-				  this.gridSize = 3;
-				  this.x = 90.5;
-				  this.y = _ORIGIN_POS_;
-				  this.bottom = this.y+(_PIXELS_*(this.gridSize-1));
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[0,1,0],[1,1,1],[0,0,0]];
-				  this.currentSet = [[0,1,0],[1,1,1],[0,0,0]];
-				 }
-function oPiece(){
-				  this.color = '#ffff00'; /*yellow*/
-				  //this.rotation = 0;
-				  this.gridSize = 2;
-				  this.x = 120.5;
-				  this.y = _ORIGIN_POS_;
-				  this.bottom = this.y+(_PIXELS_*this.gridSize);
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[1,1],[1,1]];
-				  this.currentSet = [[1,1],[1,1]];				  
-				 }
-function sPiece(){
-				  this.color = '#00ff00'; /*green*/
-				  //this.rotation = 0;
-				  this.gridSize = 3;
-				  this.x = 90.5;
-				  this.y = _ORIGIN_POS_;
-				  this.bottom = this.y+(_PIXELS_*(this.gridSize-1));
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[0,1,1],[1,1,0],[0,0,0]];
-				  this.currentSet = [[0,1,1],[1,1,0],[0,0,0]];				  
-				 }
-function zPiece(){
-				  this.color = '#ff0000'; /*red*/
-				  //this.rotation = 0;
-				  this.gridSize = 3;
-				  this.x = 120.5;
-				  this.y = _ORIGIN_POS_;
-				  this.bottom = this.y+(_PIXELS_*(this.gridSize-1));
-				  /*coords: _POSITION_,*/
-				  this.startSet = [[1,1,0],[0,1,1],[0,0,0]];
-				  this.currentSet = [[1,1,0],[0,1,1],[0,0,0]];				  
-				 }
 
 var board;
 var board_context;
 var currentPiece;
+var paused = false;
+var moveDownTimer = setInterval(function(){ movePieceDown() }, 1000);
+
+$(function(){
+	
+});
 
 //on page load set up boards
 $(function(){
@@ -123,10 +50,12 @@ $(function(){
 	for(var x = _ORIGIN_POS_; x < _MAX_RIGHT_-_ORIGIN_POS_; x+=_PIXELS_){
 		for(var y = _ORIGIN_POS_; y < _GRID_BOTTOM_; y+=_PIXELS_){
 			board_context.rect(x, y, _PIXELS_, _PIXELS_);
+			board_context.fillStyle = '#888888';
+			board_context.fillRect(x, y, _PIXELS_-_ORIGIN_POS_, _PIXELS_-_ORIGIN_POS_);
 		}
 	}
 	board_context.closePath();
-	board_context.strokeStyle = "#eee";
+	board_context.strokeStyle = "#000000";
 	board_context.stroke();
 	nextPiece();
 	drawPiece("board");
@@ -159,11 +88,52 @@ $(function(){
 				movePieceDown();
 				e.preventDefault();
 				break;
+			case 80:
+				pauseGame();
 			default:
 				break;
 		}
 	});
 });
+
+/*
+	move piece down
+	(should be automatically called ever certain time interval eventually)
+*/
+function movePieceDown(){
+	if(currentPiece.bottom == _GRID_BOTTOM_){
+ 		drawPiece("placed");
+ 		clearPiece();
+ 		var rows = getLineRows();
+		var deleteRows = checkRowForLine(rows);
+		if(deleteRows.length != 0){
+			clearLines(deleteRows);
+			shiftDown(deleteRows);
+		}
+ 		nextPiece();
+ 		drawPiece("board");
+ 	}
+	else{
+		if(checkUnder()){
+			drawPiece("placed");
+			clearPiece();
+			var rows = getLineRows();
+			var deleteRows = checkRowForLine(rows);
+			if(deleteRows.length != 0){
+				clearLines(deleteRows);
+				shiftDown(deleteRows);
+			}
+			nextPiece();
+			drawPiece("board");
+		}
+		else{
+			clearPiece();
+			currentPiece.y += 30;
+			setBottom();
+			drawPiece("board");
+		}
+	}
+}
 
 /*
 	draw current piece onto grid
@@ -184,12 +154,12 @@ function drawPiece(contextBoard){
 			if(currentPiece.currentSet[y][x] == 1){
 				draw_on_context.rect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
 				draw_on_context.fillStyle = currentPiece.color;
-				draw_on_context.fillRect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_, _PIXELS_);
+				draw_on_context.fillRect(currentPiece.x+(_PIXELS_*x), currentPiece.y+(_PIXELS_*y), _PIXELS_-_ORIGIN_POS_, _PIXELS_-_ORIGIN_POS_);
 			}
 		}
 	}
 	draw_on_context.closePath();
-	draw_on_context.strokeStyle = "#000";
+	draw_on_context.strokeStyle = "#000000";
 	draw_on_context.stroke();
 };
 
@@ -221,6 +191,22 @@ function createTransposeArray(origArray){
 	}
 	return transposed_array;
 }
+
+/*
+	set bottom
+	set currentPiece.bottom to the bottom of the actual piece, not the grid
+*/
+function setBottom(){
+	for(var row = currentPiece.gridSize-1; row >= 0; --row){
+		for(var col = 0; col < currentPiece.gridSize; ++col){
+			if(currentPiece.currentSet[row][col] == 1){
+				currentPiece.bottom = currentPiece.y+(_PIXELS_*(row+1));
+				return true;
+			}
+		}
+	}
+}
+
 /*
 	rotate the piece
 */
@@ -228,7 +214,6 @@ function rotatePiece(){
 	var transposed_array = createTransposeArray(currentPiece.currentSet);
 	var origin_y = currentPiece.y;
 	if(!checkRotationCollision(transposed_array)){
-		console.log("passed check");
 		currentPiece.currentSet = transposed_array;
 		setBottom();
 		checkRotation();
@@ -238,25 +223,6 @@ function rotatePiece(){
 	drawPiece("board"); //draw the newly rotated piece
 };
 
-/*
-	check rotation collision
-	check for collision with other pieces after a rotation
-*/
-function checkRotationCollision(transposed_array){
-	//var trans_array = createTransposeArray(transposed_array);
-	var offsetX = currentPiece.x + _BUFFER_;
-	var offsetY = currentPiece.y + _BUFFER_;
-	//console.log(transposed_array[3].toString());
-	for(row = 0; row < currentPiece.gridSize; ++row){
-	 	for(col = 0; col < currentPiece.gridSize; ++col){
-	 		var checkPlacedGrid = placed_context.getImageData(offsetX+(_PIXELS_*row), offsetY+(_PIXELS_*col), _BUFFER_, _BUFFER_);
-	 		if(checkForColor(checkPlacedGrid) && (transposed_array[col][row] == 1)){
-	 			return true;
-	 		}
-	 	}
-	}
-	return false;
-}
 
 /*
 	check if rotation goes off board
@@ -306,202 +272,6 @@ function checkRotation(){
 }
 
 /*
-	move piece left and right
-	checks for out of bounds and shifts piece back onto grid if out of bounds detected
-*/
-function movePieceSide(direction){
-	var emptyCols = 0;
-	var foundEmptyCol = true;
-	if(direction == "left"){
-		while(foundEmptyCol){
-			for(var col = 0; col < currentPiece.gridSize; ++col){
-				for(var row = 0; row < currentPiece.gridSize; ++row){
-					if(currentPiece.currentSet[row][col] == 1){
-						foundEmptyCol = false;
-						break;
-					}
-				}
-				if(foundEmptyCol){
-					emptyCols += 1;
-				}
-				else{
-					break;
-				}
-			}
-		}
-		if((currentPiece.x - _PIXELS_) >= (-_ORIGIN_POS_ - (_PIXELS_*emptyCols))){	
-			clearPiece();
-			currentPiece.x -= _PIXELS_;
-			drawPiece("board");
-		}
-	}
-	else if(direction == "right"){
-		while(foundEmptyCol){
-			for(var col = currentPiece.gridSize-1; col >= 0; --col){
-				for(var row = 0; row < currentPiece.gridSize; ++row){
-					if(currentPiece.currentSet[row][col] == 1){
-						foundEmptyCol = false;
-						break;
-					}
-				}
-				if(foundEmptyCol){
-					emptyCols += 1;
-				}
-				else{
-					break;
-				}
-			}
-		}
-		if((currentPiece.x + _PIXELS_) <= ((_MAX_RIGHT_ - (_PIXELS_ * currentPiece.gridSize))+(_PIXELS_*emptyCols))){	
-			clearPiece();
-			currentPiece.x += _PIXELS_;
-			drawPiece("board");
-		}
-	}
-	else{
-		throw "Error: WHAT ARE YOU DOING??? invalid direction code";
-	}
-}
-
-/*
-	check sides
-	check for collisions when moving side to side
-*/
-function checkSides(dir){
-	for(col = 0; col < currentPiece.gridSize; ++col){
-		for(row = 0; row < currentPiece.gridSize; ++row){
-			if(dir == "left"){
-				if(currentPiece.currentSet[row][col] == 1){
-					if(col == 0){
-						if(checkSidesHelper(row, col, dir)){ //do not return checkSidesHelper because if false we want to continue.
-							return true;
-						}
-					}
-					else{
-						if(currentPiece.currentSet[row][col-1] != 1){
-							if(checkSidesHelper(row, col, dir)){
-								return true;
-							}
-						}
-					}
-				}
-			}
-			else if(dir == "right"){
-				if(currentPiece.currentSet[row][col] == 1){
-					if(col < currentPiece.gridSize-1){
-						if(currentPiece.currentSet[row][col+1] != 1){
-							if(checkSidesHelper(row, col, dir)){
-								return true;
-							}
-						}
-					}
-					else{
-						if(checkSidesHelper(row, col, dir)){
-							return true;
-						}
-					}
-				}
-			}
-			else{
-				throw "Error: Invalid direction";
-			}
-		}
-	}
-	return false;
-}
-
-/*
-	check sides helper
-	check for piece collision when moving left and right
-*/
-function checkSidesHelper(row, col, dir){
-	//var buffer = 10; //buffer to check smaller area to prevent clipping due to inaccurate line drawing from neighboring spaces
-	if(dir == "right"){
-		var offset = col+1;
-	}
-	if(dir == "left"){
-		var offset = col-1;
-	}
-	var coordX = currentPiece.x+(_PIXELS_*offset)+_BUFFER_;
-	var coordY = currentPiece.y+(_PIXELS_*row)+_BUFFER_;
-	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, _BUFFER_, _BUFFER_);
-	return checkForColor(checkPlacedGrid);
-}
-
-/*
-	move piece down
-	(should be automatically called ever certain time interval eventually)
-*/
-function movePieceDown(){
-	if(currentPiece.bottom == _GRID_BOTTOM_){
- 		drawPiece("placed");
- 		var rows = getLineRows();
-		var deleteRows = checkRowForLine(rows);
-		if(deleteRows.length != 0){
-			clearLines(deleteRows);
-			shiftBoard
-		}
- 		nextPiece();
- 		drawPiece("board");
- 	}
-	else{
-		if(checkUnder()){
-			drawPiece("placed");
-			var rows = getLineRows();
-			var deleteRows = checkRowForLine(rows);
-			if(deleteRows.length != 0){
-				clearLines(deleteRows);
-			}
-			nextPiece();
-			drawPiece("board");
-		}
-		else{
-			clearPiece();
-			currentPiece.y += 30;
-			setBottom();
-			drawPiece("board");
-		}
-	}
-}
-
-/*
-	check under
-	check under piece to see if it sits on another piece
-*/
-function checkUnder(){
-	for(var row = currentPiece.gridSize-1; row >= 0; --row){
-		for(var col = 0; col < currentPiece.gridSize; ++col){
-			if(currentPiece.currentSet[row][col] == 1){
-				if(row < currentPiece.gridSize-1){
-					if(currentPiece.currentSet[row+1][col] != 1){
-						if(checkUnderHelper(row, col)){//do not return checkUnderHelper because if false we want to continue.
-							return true;
-						}
-					}
-				}
-				else{
-					if(checkUnderHelper(row, col)){
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-/*
-	check under helper
-	check grid space under piece to see if it contains a color (denotes a piece is occupying that space)
-*/
-function checkUnderHelper(row, col){
-	var coordX = currentPiece.x+(_PIXELS_*col)+_BUFFER_;
-	var coordY = currentPiece.y+(_PIXELS_*(row+1))+_BUFFER_;
-	var checkPlacedGrid = placed_context.getImageData(coordX, coordY, _BUFFER_, _BUFFER_);
-	return checkForColor(checkPlacedGrid);
-}
-
-/*
 	get line rows
 	get the rows the piece was just played in to check for completed lines
 */
@@ -546,49 +316,35 @@ function checkRowForLine(lines){
 */
 function clearLines(deleteLines){
 	var boardWidth = (_MAX_RIGHT_ - _ORIGIN_POS_)/_PIXELS_;
+	placed_context.beginPath();
+	board_context.beginPath();
 	for(var row = 0; row < deleteLines.length; ++row){
-		placed_context.beginPath();
 		for(var r = 0; r < boardWidth; ++r){
-			placed_context.rect(_ORIGIN_POS_+(_PIXELS_*r), deleteLines[row], _PIXELS_+1, _PIXELS_+1);
-			placed_context.fillStyle = '#ffffff';
-			placed_context.fillRect(_ORIGIN_POS_+(_PIXELS_*r), deleteLines[row], _PIXELS_+1, _PIXELS_+1);
+			placed_context.rect(_ORIGIN_POS_+(_PIXELS_*r), deleteLines[row], _PIXELS_, _PIXELS_);
+			placed_context.fillStyle = '#888888';
+			placed_context.fillRect(_ORIGIN_POS_+(_PIXELS_*r), deleteLines[row], _PIXELS_-_ORIGIN_POS_, _PIXELS_-_ORIGIN_POS_);
+			
+			board_context.rect(_ORIGIN_POS_+(_PIXELS_*r), deleteLines[row], _PIXELS_, _PIXELS_);
+			board_context.fillStyle = '#888888';
+			board_context.fillRect(_ORIGIN_POS_+(_PIXELS_*r), deleteLines[row], _PIXELS_-_ORIGIN_POS_, _PIXELS_-_ORIGIN_POS_);
 		}
-		placed_context.closePath()
-		placed_context.strokeStyle = '#eee';
+		placed_context.closePath();
+		placed_context.strokeStyle = '#000000';
 		placed_context.stroke();
-	}
-}
-/*
-	check for color
-	check if a grid space contains a color (aka a piece)
-*/
-function checkForColor(checkPlacedGrid){
-	if(checkPlacedGrid.data[0] != 0){
-		return true;
-	}
-	else if(checkPlacedGrid.data[1] != 0){
-		return true;
-	}
-	else if(checkPlacedGrid.data[2] != 0){
-		return true;
-	}
-	else{
-		return false;
+		board_context.closePath();
+		board_context.strokeStyle = '#000000';
+		board_context.stroke();
 	}
 }
 
 /*
-	set bottom
-	set currentPiece.bottom to the bottom of the actual piece, not the grid
+	shift down
+	shift lines above cleared lines down to fill in space
 */
-function setBottom(){
-	for(var row = currentPiece.gridSize-1; row >= 0; --row){
-		for(var col = 0; col < currentPiece.gridSize; ++col){
-			if(currentPiece.currentSet[row][col] == 1){
-				currentPiece.bottom = currentPiece.y+(_PIXELS_*(row+1));
-				return true;
-			}
-		}
+function shiftDown(deletedRows){
+	for(var x = 0; x < deletedRows.length; ++x){
+		var aboveLines = placed_context.getImageData(.5, .5, 300.5, deletedRows[x]);
+		placed_context.putImageData(aboveLines, .5, 30.5);
 	}
 }
 
@@ -599,58 +355,21 @@ function clearPiece(){
 	for(var i = 0; i < currentPiece.gridSize; ++i){
 		for(var j = 0; j < currentPiece.gridSize; ++j){
 			board_context.rect(currentPiece.x+(_PIXELS_*i), currentPiece.y+(_PIXELS_*j), _PIXELS_, _PIXELS_);
-			board_context.fillStyle = '#ffffff';
+			board_context.fillStyle = '#888888';
 			board_context.fillRect(currentPiece.x+(_PIXELS_*i), currentPiece.y+(_PIXELS_*j), _PIXELS_, _PIXELS_);
 		}
 	}
-	board_context.strokeStyle = "#eee";
+	board_context.strokeStyle = "#000000";
 	board_context.stroke();
 }
 
-/*
-	get next piece to play
-*/
-function nextPiece(){
-	if(_UNPLAYED_PIECES_ == 0){
-		_UNPLAYED_PIECES_ = new Array(_NEXT_PIECE_ARRAY_.length);
-		for(var x = 0; x < _NEXT_PIECE_ARRAY_.length; ++x){
-			_UNPLAYED_PIECES_[x] = _NEXT_PIECE_ARRAY_[x];
-		}
+function pauseGame(){
+	if(paused){
+		paused = false;
+		moveDownTimer = setInterval(function(){ movePieceDown() }, 1000);
 	}
-	var arrayLength = _UNPLAYED_PIECES_.length;
-	var indexNextPiece = Math.floor(Math.random()*arrayLength);
-	var nextPiece = _UNPLAYED_PIECES_[indexNextPiece];
-	_UNPLAYED_PIECES_.splice(indexNextPiece,1);
-	switch(nextPiece){
-		case "i":
-			currentPiece = new iPiece();
-			//drawPiece();
-			break;
-		case "j":
-			currentPiece = new jPiece();
-			//drawPiece();
-			break;
-		case "l":
-			currentPiece = new lPiece();
-			//drawPiece();
-			break;
-		case "t":
-			currentPiece = new tPiece();
-			//drawPiece();
-			break;
-		case "o":
-			currentPiece = new oPiece();
-			//drawPiece();
-			break;
-		case "s":
-			currentPiece = new sPiece();
-			//drawPiece();
-			break;
-		case "z":
-			currentPiece = new zPiece();
-			//drawPiece();
-			break;
-		default:
-			throw "Error: could not retrieve next piece";
+	else{
+		paused = true;
+		clearInterval(moveDownTimer);
 	}
 }

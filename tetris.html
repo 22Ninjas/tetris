@@ -2,12 +2,16 @@
 <head>
 <link rel="stylesheet" type="text/css" href="style.css"/>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="tetrimino.js"></script>
+<script src="collisions.js"></script>
 <script src="tetris.js"></script>
 <title>TETRIS</title>
 </head>
 <body>
 
-	<canvas id="tetrisboard" style="border: 1px solid black; z-index: 1; position: absolute; top=0; left=0;" width="300" height="600"></canvas>
-	<canvas id="board" style="boarder: none; z-index: 2; position: absolute; top=0; left=0;" width="300" height="600"></canvas>
+	<div id="game">
+		<canvas id="tetrisboard" style="border: 1px solid black; z-index: 1; position: absolute; top=0; left=0;" width="300" height="600"></canvas>
+		<canvas id="board" style="boarder: 1px solid black; z-index: 2; position: absolute; top=0; left=0;" width="300" height="600"></canvas>
+	</div>
 </body>
 </html>
