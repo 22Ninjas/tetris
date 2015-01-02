@@ -184,15 +184,12 @@ function checkRotationCollision(transposed_array){
 */
 function checkForColor(checkPlacedGrid){
 	if(checkPlacedGrid.data[0] != 0){
-		console.log("red");
 		return true;
 	}
 	else if(checkPlacedGrid.data[1] != 0){
-		console.log("green");
 		return true;
 	}
 	else if(checkPlacedGrid.data[2] != 0){
-		console.log("blue");
 		return true;
 	}
 	else{

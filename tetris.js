@@ -23,14 +23,14 @@ var board;
 var board_context;
 var currentPiece;
 var paused = false;
-var moveDownTimer = setInterval(function(){ movePieceDown() }, 1000);
-
-$(function(){
-	
-});
+var intervalSpeed = 1000;
+var moveDownTimer = setInterval(function(){ movePieceDown() }, intervalSpeed);
+var score = 0;
 
 //on page load set up boards
 $(function(){
+	var scoreText = '<p>'+score+'</p>';
+	$('#score').append(scoreText);
 	board = document.getElementById("tetrisboard");
 	board_context = board.getContext("2d");
 	board_context.beginPath();
@@ -109,6 +109,7 @@ function movePieceDown(){
 		if(deleteRows.length != 0){
 			clearLines(deleteRows);
 			shiftDown(deleteRows);
+			updateScore(deleteRows.length);
 		}
  		nextPiece();
  		drawPiece("board");
@@ -122,6 +123,7 @@ function movePieceDown(){
 			if(deleteRows.length != 0){
 				clearLines(deleteRows);
 				shiftDown(deleteRows);
+				updateScore(deleteRows.length);
 			}
 			nextPiece();
 			drawPiece("board");
@@ -363,13 +365,35 @@ function clearPiece(){
 	board_context.stroke();
 }
 
+function updateScore(lines){
+	if(lines < 4){
+		score += lines;
+	}
+	else{
+		score += 10;
+	}
+	$('#score p:nth-of-type(2)').text(score);
+	if(score/10 >= 1){
+		var tempSpeed = intervalSpeed-(100*Math.floor(score/10));
+		console.log(intervalSpeed);
+		intervalSpeed = tempSpeed;
+		updateInterval(tempSpeed);
+	}
+}
+
 function pauseGame(){
 	if(paused){
 		paused = false;
-		moveDownTimer = setInterval(function(){ movePieceDown() }, 1000);
+		moveDownTimer = setInterval(function(){ movePieceDown() }, intervalSpeed);
 	}
 	else{
 		paused = true;
 		clearInterval(moveDownTimer);
 	}
+}
+
+function updateInterval(speed){
+	console.log(speed);
+	clearInterval(moveDownTimer);
+	moveDownTimer = setInterval(function(){ movePieceDown() }, speed);
 }
