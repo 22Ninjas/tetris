@@ -31,3 +31,11 @@ html, body{
 	margin-top:-15px;
 	text-align: left;
 }
+#gameOver{
+	position: absolute;
+	background-color: #ffffff;
+	top: 100px;
+	display: none;
+	width: 100%;
+	height: 200px;
+}

@@ -21,14 +21,34 @@ var _UNPLAYED_PIECES_ = ["i","i","i","i",
 
 var board;
 var board_context;
+var placed_board;
+var placed_context;
 var currentPiece;
 var paused = false;
 var intervalSpeed = 1000;
-var moveDownTimer = setInterval(function(){ movePieceDown() }, intervalSpeed);
+var moveDownTimer;
 var score = 0;
+var gameEnd = false;
 
 //on page load set up boards
 $(function(){
+	startGame();
+});
+
+$(function(){
+	$('#reset').click(function(){
+	console.log("here");
+		clearInterval(moveDownTimer);
+		$('#score p:nth-of-type(2)').remove();
+		$('#gameOver').css('display','none');
+		board_context.clearRect(0,0,$('#tetrisboard').width(), $('#tetrisboard').height());
+		placed_context.clearRect(0,0,$('#board').width(), $('#board').height());
+		startGame();
+	});
+});
+
+function startGame(){
+moveDownTimer = setInterval(function(){ movePieceDown() }, intervalSpeed);
 	var scoreText = '<p>'+score+'</p>';
 	$('#score').append(scoreText);
 	board = document.getElementById("tetrisboard");
@@ -59,7 +79,7 @@ $(function(){
 	board_context.stroke();
 	nextPiece();
 	drawPiece("board");
-});
+}
 
 /*
 	listen for keypress
@@ -116,17 +136,26 @@ function movePieceDown(){
  	}
 	else{
 		if(checkUnder()){
-			drawPiece("placed");
-			clearPiece();
-			var rows = getLineRows();
-			var deleteRows = checkRowForLine(rows);
-			if(deleteRows.length != 0){
-				clearLines(deleteRows);
-				shiftDown(deleteRows);
-				updateScore(deleteRows.length);
+			if(currentPiece.y != _ORIGIN_POS_){
+				drawPiece("placed");
+				clearPiece();
+				var rows = getLineRows();
+				var deleteRows = checkRowForLine(rows);
+				if(deleteRows.length != 0){
+					clearLines(deleteRows);
+					shiftDown(deleteRows);
+					updateScore(deleteRows.length);
+				}
+				nextPiece();
+				drawPiece("board");
 			}
-			nextPiece();
-			drawPiece("board");
+			else{
+				drawPiece("placed");
+				$('#gameOver').css('display', 'block');
+				$('#gameOver').css('z-index', '100');
+				gameEnd = true;
+				return;
+			}
 		}
 		else{
 			clearPiece();
@@ -141,6 +170,8 @@ function movePieceDown(){
 	draw current piece onto grid
 */
 function drawPiece(contextBoard){
+	
+	
 	if(contextBoard == "placed"){
 		draw_on_context = placed_context;
 	}
@@ -345,8 +376,8 @@ function clearLines(deleteLines){
 */
 function shiftDown(deletedRows){
 	for(var x = 0; x < deletedRows.length; ++x){
-		var aboveLines = placed_context.getImageData(.5, .5, 300.5, deletedRows[x]);
-		placed_context.putImageData(aboveLines, .5, 30.5);
+		var aboveLines = placed_context.getImageData(_ORIGIN_POS_, _ORIGIN_POS_, _MAX_RIGHT_, deletedRows[x]);
+		placed_context.putImageData(aboveLines, _ORIGIN_POS_, _PIXELS_+_ORIGIN_POS_);
 	}
 }
 
