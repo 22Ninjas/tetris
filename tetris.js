@@ -39,6 +39,7 @@ $(function(){
 	$('#reset').click(function(){
 	console.log("here");
 		clearInterval(moveDownTimer);
+		intervalSpeed = 1000;
 		$('#score p:nth-of-type(2)').remove();
 		$('#gameOver').css('display','none');
 		board_context.clearRect(0,0,$('#tetrisboard').width(), $('#tetrisboard').height());
