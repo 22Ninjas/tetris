@@ -33,9 +33,28 @@ html, body{
 }
 #gameOver{
 	position: absolute;
-	background-color: #ffffff;
+	padding-top: 75px;
+	background-color: #101010;
+	color: #009933;
+	font-size: 25px;
+	font-weight: bold;
+	line-height: 30px;
+	text-align: middle;
 	top: 100px;
 	display: none;
-	width: 100%;
-	height: 200px;
+	width: 303px;
+	height: 175px;
+	z-index: 100;
+}
+#paused{
+	position: absolute;
+	background-color: #101010;
+	color: #ffff00;
+	line-height: 75px;
+	text-align: middle;
+	top: 150px;
+	display: none;
+	width: 303px;
+	height: 75px;
+	z-index: 99;
 }

@@ -146,7 +146,7 @@ function movePieceDown(){
 			else{
 				drawPiece("placed");
 				$('#gameOver').css('display', 'block');
-				$('#gameOver').css('z-index', '100');
+				//$('#gameOver').css('z-index', '100');
 				gameEnd = true;
 				return;
 			}
@@ -406,10 +406,12 @@ function updateScore(lines){
 
 function pauseGame(){
 	if(paused){
+		$('#paused').css('display','none');
 		paused = false;
 		moveDownTimer = setInterval(function(){ movePieceDown() }, intervalSpeed);
 	}
 	else{
+		$('#paused').css('display','block');
 		paused = true;
 		clearInterval(moveDownTimer);
 	}
