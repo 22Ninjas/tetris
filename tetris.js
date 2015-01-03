@@ -19,16 +19,7 @@ var _UNPLAYED_PIECES_ = ["i","i","i","i",
 					 "s","s","s","s",
 					 "z","z","z","z"]; //unplayed pieces
 
-var board;
-var board_context;
-var placed_board;
-var placed_context;
-var currentPiece;
-var paused = false;
-var intervalSpeed = 1000;
-var moveDownTimer;
-var score = 0;
-var gameEnd = false;
+var board, board_context, placed_board, placed_context, currentPiece, paused, intervalSpeed, moveDownTimer, score, gameEnd;
 
 //on page load set up boards
 $(function(){
@@ -37,9 +28,7 @@ $(function(){
 
 $(function(){
 	$('#reset').click(function(){
-	console.log("here");
 		clearInterval(moveDownTimer);
-		intervalSpeed = 1000;
 		$('#score p:nth-of-type(2)').remove();
 		$('#gameOver').css('display','none');
 		board_context.clearRect(0,0,$('#tetrisboard').width(), $('#tetrisboard').height());
@@ -49,7 +38,11 @@ $(function(){
 });
 
 function startGame(){
-moveDownTimer = setInterval(function(){ movePieceDown() }, intervalSpeed);
+	paused = false;
+	intervalSpeed = 1000;
+	gameEnd = false;
+	score = 0;
+	moveDownTimer = setInterval(function(){ movePieceDown() }, intervalSpeed);
 	var scoreText = '<p>'+score+'</p>';
 	$('#score').append(scoreText);
 	board = document.getElementById("tetrisboard");
@@ -399,18 +392,16 @@ function clearPiece(){
 
 function updateScore(lines){
 	if(lines < 4){
+		if(10-(score%10)-lines<=0){
+			updateInterval();
+		}
 		score += lines;
 	}
 	else{
 		score += 10;
+		updateInterval();
 	}
 	$('#score p:nth-of-type(2)').text(score);
-	if(score/10 >= 1){
-		var tempSpeed = intervalSpeed-(100*Math.floor(score/10));
-		console.log(intervalSpeed);
-		intervalSpeed = tempSpeed;
-		updateInterval(tempSpeed);
-	}
 }
 
 function pauseGame(){
@@ -424,8 +415,8 @@ function pauseGame(){
 	}
 }
 
-function updateInterval(speed){
-	console.log(speed);
+function updateInterval(){
+	intervalSpeed -= 125;
 	clearInterval(moveDownTimer);
-	moveDownTimer = setInterval(function(){ movePieceDown() }, speed);
+	moveDownTimer = setInterval(function(){ movePieceDown() }, intervalSpeed);
 }
