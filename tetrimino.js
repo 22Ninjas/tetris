@@ -103,10 +103,8 @@ Piece.prototype.checkRotation = function(){
 	}
 }
 Piece.prototype.checkRotationCollision = function(transposed_array){
-	//var trans_array = createTransposeArray(transposed_array);
 	var offsetX = this.x + BUFFER;
 	var offsetY = this.y + BUFFER;
-	//console.log(transposed_array[3].toString());
 	for(row = 0; row < this.gridSize; ++row){
 	 	for(col = 0; col < this.gridSize; ++col){
 	 		var checkPlacedGrid = placed_context.getImageData(offsetX+(PIXELS*row), offsetY+(PIXELS*col), BUFFER, BUFFER);
@@ -222,8 +220,6 @@ Piece.prototype.checkSidesHelper = function(row, col, dir){
 }
 Piece.prototype.moveDown = function(){
 	if(this.bottom == GRID_BOTTOM){
- 		this.draw("placed");
- 		this.clear();
  		var rows = getLineRows();
 		var deleteRows = checkRowForLine(rows);
 		if(deleteRows.length != 0){
@@ -231,14 +227,11 @@ Piece.prototype.moveDown = function(){
 			shiftDown(deleteRows);
 			updateScore(deleteRows.length);
 		}
- 		currentPiece = nextPiece();
- 		currentPiece.draw("board");
+ 		return false;
  	}
 	else{
 		if(this.checkUnder()){
 			if(this.y != ORIGIN_POS){
-				this.draw("placed");
-				this.clear();
 				var rows = getLineRows();
 				var deleteRows = checkRowForLine(rows);
 				if(deleteRows.length != 0){
@@ -246,21 +239,21 @@ Piece.prototype.moveDown = function(){
 					shiftDown(deleteRows);
 					updateScore(deleteRows.length);
 				}
-				currentPiece = nextPiece();
-				currentPiece.draw("board");
+				return false;
+				// currentPiece = nextPiece();
+				// currentPiece.draw("board");
 			}
 			else{
 				this.draw("placed");
 				$('#gameOver').css('display', 'block');
 				gameEnd = true;
-				return;
+				return false;
 			}
 		}
 		else{
-			this.clear();
-			this.y += 30;
-			this.setBottom();
-			this.draw("board");
+			return true;
+			// this.setBottom();
+			// this.draw("board");
 		}
 	}
 }

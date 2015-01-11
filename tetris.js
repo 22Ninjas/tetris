@@ -36,12 +36,23 @@ $(function(){
 	});
 });
 function startGame(){
-	console.log(currentPiece);
 	paused = false;
 	intervalSpeed = 1000;
 	gameEnd = false;
 	score = 0;
-	moveDownTimer = setInterval(function(){ currentPiece.moveDown() }, intervalSpeed);
+	moveDownTimer = setInterval(function(){
+									if(!currentPiece.moveDown()){
+										currentPiece.clear();
+										currentPiece.draw("placed");
+										currentPiece = nextPiece();
+									}
+									else{
+										currentPiece.clear();
+										currentPiece.y += 30;
+										currentPiece.setBottom();
+									}
+									currentPiece.draw("board");
+								}, intervalSpeed);
 	var scoreText = '<p>'+score+'</p>';
 	$('#score').append(scoreText);
 	board = document.getElementById("tetrisboard");
@@ -139,7 +150,17 @@ $(function(){
 				e.preventDefault();
 				break;
 			case 40://down
-				currentPiece.moveDown();
+				if(!currentPiece.moveDown()){
+					currentPiece.clear();
+					currentPiece.draw("placed");
+					currentPiece = nextPiece();
+				}
+				else{
+					currentPiece.clear();
+					currentPiece.y += 30;
+					currentPiece.setBottom();
+				}
+				currentPiece.draw("board");
 				e.preventDefault();
 				break;
 			case 80:
@@ -237,7 +258,19 @@ function pauseGame(){
 	if(paused){
 		$('#paused').css('display','none');
 		paused = false;
-		moveDownTimer = setInterval(function(){ currentPiece.moveDown() }, intervalSpeed);
+		moveDownTimer = setInterval(function(){
+									if(!currentPiece.moveDown()){
+										currentPiece.clear();
+										currentPiece.draw("placed");
+										currentPiece = nextPiece();
+									}
+									else{
+										currentPiece.clear();
+										currentPiece.y += 30;
+										currentPiece.setBottom();
+									}
+									currentPiece.draw("board");
+								}, intervalSpeed);
 	}
 	else{
 		$('#paused').css('display','block');
@@ -248,5 +281,17 @@ function pauseGame(){
 function updateInterval(){
 	intervalSpeed -= 125;
 	clearInterval(moveDownTimer);
-	moveDownTimer = setInterval(function(){ currentPiece.moveDown() }, intervalSpeed);
+	moveDownTimer = setInterval(function(){
+									if(!currentPiece.moveDown()){
+										currentPiece.clear();
+										currentPiece.draw("placed");
+										currentPiece = nextPiece();
+									}
+									else{
+										currentPiece.clear();							
+										currentPiece.y += 30;
+										currentPiece.setBottom();
+									}
+									currentPiece.draw("board");
+								}, intervalSpeed);
 }
