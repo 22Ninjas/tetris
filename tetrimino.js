@@ -1,7 +1,7 @@
 /*
 	Piece Object
 */
-var Piece = function(pieceShape, color, size, coordX, coordY, bot, startSet, currSet){
+var Piece = function(pieceShape, color, size, coordX, coordY, bot, startSet){
 	this.shape = pieceShape;
 	this.color = color;
 	this.gridSize = size;
@@ -9,10 +9,13 @@ var Piece = function(pieceShape, color, size, coordX, coordY, bot, startSet, cur
 	this.y = coordY;
 	this.bottom = bot;
 	this.startSet = startSet;
-	this.currentSet = currSet;
+	this.currentSet = startSet;
 };
-/*
-	Piece methods
+//Piece methods
+
+/**
+	setBottom method
+	set the y-coordinate of the bottom of the piece
 */
 Piece.prototype.setBottom = function(){
 	for(var row = this.gridSize-1; row >= 0; --row){
@@ -24,6 +27,11 @@ Piece.prototype.setBottom = function(){
 		}
 	}
 }
+/**
+	createTranspose method
+	transposes the array that represents the orientation of the piece
+	@origArray the array that represents the current orientation
+*/
 Piece.prototype.createTranspose = function(origArray){
 	var original_array = origArray;
 	var transposed_array = [];
@@ -48,6 +56,10 @@ Piece.prototype.createTranspose = function(origArray){
 	}
 	return transposed_array;
 }
+/**
+	rotate method
+	begin the process for rotating a piece
+*/
 Piece.prototype.rotate = function(){
 	var transposed_array = this.createTranspose(this.currentSet);
 	var origin_y = this.y;
@@ -60,8 +72,12 @@ Piece.prototype.rotate = function(){
 	this.clear(); //remove the piece in original orientation
 	this.draw("board"); //draw the newly rotated piece
 }
+/**
+	checkRotation method
+	check the validity of a rotation to see if the piece goes out of bound
+*/
 Piece.prototype.checkRotation = function(){
-	var shift = 0;
+	var shift = 0; //number of lines to shift left/right
 	//check left grid bounds
 	if(this.x < ORIGIN_POS){
 		var colOverflow = (-(this.x-ORIGIN_POS)/PIXELS);
@@ -102,6 +118,10 @@ Piece.prototype.checkRotation = function(){
 		this.y += 30*shift;
 	}
 }
+/**
+	checkRotationCollision method
+	checks the validity of a rotation to check for overlapping piece
+*/
 Piece.prototype.checkRotationCollision = function(transposed_array){
 	var offsetX = this.x + BUFFER;
 	var offsetY = this.y + BUFFER;
@@ -115,13 +135,18 @@ Piece.prototype.checkRotationCollision = function(transposed_array){
 	}
 	return false;
 }
-Piece.prototype.moveLeft = function(){
+Piece.prototype.moveSide = function(dir){
 	var emptyCols = 0;
 	var foundEmptyCol = true;
+	var column;
 	while(foundEmptyCol){
 		for(var col = 0; col < this.gridSize; ++col){
+			column = col;
 			for(var row = 0; row < this.gridSize; ++row){
-				if(this.currentSet[row][col] == 1){
+				if(dir == 'right'){
+					column = this.gridSize - col;
+				}
+				if(this.currentSet[row][column] == 1){
 					foundEmptyCol = false;
 					break;
 				}
@@ -134,10 +159,22 @@ Piece.prototype.moveLeft = function(){
 			}
 		}
 	}
-	if((this.x - PIXELS) >= (-ORIGIN_POS - (PIXELS*emptyCols))){	
-		this.clear();
-		this.x -= PIXELS;
-		this.draw("board");
+	if(dir == 'left'){
+		if((this.x - PIXELS) >= (-ORIGIN_POS - (PIXELS*emptyCols))){	
+			this.clear();
+			this.x -= PIXELS;
+			this.draw("board");
+		}
+	}
+	else if(dir == 'right'){
+		if((this.x + (2*PIXELS)) <= ((MAX_RIGHT - (PIXELS * this.gridSize))+(PIXELS*emptyCols))){	
+			this.clear();
+			this.x += PIXELS;
+			this.draw("board");
+		}
+	}
+	else{
+		throw 'Error: invalid direction';
 	}
 }
 Piece.prototype.checkLeft = function(){
@@ -158,31 +195,6 @@ Piece.prototype.checkLeft = function(){
 				}
 			}
 		}
-	}
-}
-Piece.prototype.moveRight = function(){
-	var emptyCols = 0;
-	var foundEmptyCol = true;
-	while(foundEmptyCol){
-		for(var col = this.gridSize-1; col >= 0; --col){
-			for(var row = 0; row < this.gridSize; ++row){
-				if(this.currentSet[row][col] == 1){
-					foundEmptyCol = false;
-					break;
-				}
-			}
-			if(foundEmptyCol){
-				emptyCols += 1;
-			}
-			else{
-				break;
-			}
-		}
-	}
-	if((this.x + PIXELS) <= ((MAX_RIGHT - (PIXELS * this.gridSize))+(PIXELS*emptyCols))){	
-		this.clear();
-		this.x += PIXELS;
-		this.draw("board");
 	}
 }
 Piece.prototype.checkRight = function(){
@@ -323,36 +335,78 @@ Piece.prototype.clear = function(){
 I.prototype = new Piece();
 I.prototype.constructor = I;
 function I(){
-	Piece.call(this, 'iPiece', '#00ffff', 4, 90.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*4), [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]], [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]]);
+	Piece.call(this, 'iPiece', '#00ffff', 4, 90.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*4), 
+		[
+			[0,1,0,0],
+			[0,1,0,0],
+			[0,1,0,0],
+			[0,1,0,0]
+		]
+	);
 }
 L.prototype = new Piece();
 L.prototype.constructor = L;
 function L(){
-	Piece.call(this, 'lPiece', '#ff6600', 3, 120.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), [[1,0,0],[1,0,0],[1,1,0]], [[1,0,0],[1,0,0],[1,1,0]]);
+	Piece.call(this, 'lPiece', '#ff6600', 3, 120.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), 
+		[
+			[1,0,0],
+			[1,0,0],
+			[1,1,0]
+		]
+	);
 }
 J.prototype = new Piece();
 J.prototype.constructor = J;
 function J(){
-	Piece.call(this, 'jPiece', '#0000ff', 3, 90.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), [[0,0,1],[0,0,1],[0,1,1]], [[0,0,1],[0,0,1],[0,1,1]]);
+	Piece.call(this, 'jPiece', '#0000ff', 3, 90.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), 
+		[
+			[0,0,1],
+			[0,0,1],
+			[0,1,1]
+		]
+	);
 }
 T.prototype = new Piece();
 T.prototype.constructor = T;
 function T(){
-	Piece.call(this, 'tPiece', '#9900cc', 3, 90.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), [[0,1,0],[1,1,1],[0,0,0]], [[0,1,0],[1,1,1],[0,0,0]]);
+	Piece.call(this, 'tPiece', '#9900cc', 3, 90.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), 
+		[
+			[0,1,0],
+			[1,1,1],
+			[0,0,0]
+		]
+	);
 }
 O.prototype = new Piece();
 O.prototype.constructor = O;
 function O(){
-	Piece.call(this, 'oPiece', '#ffff00', 2, 120.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*2), [[1,1],[1,1]], [[1,1],[1,1]]);
+	Piece.call(this, 'oPiece', '#ffff00', 2, 120.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*2), 
+		[
+			[1,1],
+			[1,1]
+		]
+	);
 }
 S.prototype = new Piece();
 S.prototype.constructor = S;
 function S(){
-	Piece.call(this, 'sPiece', '#00ff00', 3, 90.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), [[0,1,1],[1,1,0],[0,0,0]], [[0,1,1],[1,1,0],[0,0,0]]);
+	Piece.call(this, 'sPiece', '#00ff00', 3, 90.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), 
+		[
+			[0,1,1],
+			[1,1,0],
+			[0,0,0]
+		]
+	);
 }
 Z.prototype = new Piece();
 Z.prototype.constructor = Z;
 function Z(){
-	Piece.call(this, 'zPiece', '#ff0000', 3, 120.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), [[1,1,0],[0,1,1],[0,0,0]], [[1,1,0],[0,1,1],[0,0,0]]);
+	Piece.call(this, 'zPiece', '#ff0000', 3, 120.5, ORIGIN_POS, ORIGIN_POS+(PIXELS*3), 
+		[
+			[1,1,0],
+			[0,1,1],
+			[0,0,0]
+		]
+	);
 }
 
