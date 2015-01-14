@@ -3,6 +3,7 @@ var ORIGIN_POS = 0.5; //coordinate for origin of board
 var MAX_RIGHT = 300.5; //coordinate for rightmost edge of board
 var GRID_BOTTOM = 600.5; //coordinate for lower edge of board
 var BUFFER = 10; //10 pixel buffer to shrink area when checking if a grid space is taken
+var BOARD_WIDTH = (MAX_RIGHT - ORIGIN_POS)/PIXELS;
 var NEXT_PIECE_ARRAY = [
   'i','i','i','i',
   'j','j','j','j',
@@ -58,11 +59,7 @@ $(function(){
 	});
 });
 
-/**
-	startGame function
-	instantiate variables that hold game status.
-*/
-function startGame(){
+function initVars(){
 	paused = false;
 	intervalSpeed = 1000;
 	gameEnd = false;
@@ -108,6 +105,13 @@ function startGame(){
 	board_context.closePath();
 	board_context.strokeStyle = '#000000';
 	board_context.stroke();
+}
+/**
+	startGame function
+	instantiate variables that hold game status.
+*/
+function startGame(){
+	initVars();
 	currentPiece = nextPiece();
 	currentPiece.draw('board');
 }
@@ -187,6 +191,13 @@ $(function(){
 				if(!currentPiece.moveDown()){
 					currentPiece.clear();
 					currentPiece.draw('placed');
+					var rows = getLineRows();
+					var deleteRows = checkRowForLine(rows);
+					if(deleteRows.length != 0){
+						clearLines(deleteRows);
+						shiftDown(deleteRows);
+						updateScore(deleteRows.length);
+					}
 					currentPiece = nextPiece();
 				}
 				else{
@@ -247,17 +258,16 @@ function getLineRows(){
 	@lines y-coordinates of the lines we need to check
 */
 function checkRowForLine(lines){
-	var boardWidth = (MAX_RIGHT - ORIGIN_POS)/PIXELS;
 	var linesToDel = [];
 	for(var i = 0; i < lines.length; ++i){
 		var filledSpaces = 0;
-		for(var y = 0; y < boardWidth; ++y){
+		for(var y = 0; y < BOARD_WIDTH; ++y){
 			var checkPlacedGrid = placed_context.getImageData(BUFFER+(PIXELS*y), lines[i]+BUFFER, BUFFER, BUFFER);
 			if(checkForColor(checkPlacedGrid)){
 				filledSpaces += 1;
 			}
 		}
-		if(filledSpaces == boardWidth){
+		if(filledSpaces == BOARD_WIDTH){
 			linesToDel.push(lines[i]);
 		}
 	}
@@ -269,11 +279,10 @@ function checkRowForLine(lines){
 	@deleteLines the y-coordinate of the line that we are clearing (reseting the colors)
 */
 function clearLines(deleteLines){
-	var boardWidth = (MAX_RIGHT - ORIGIN_POS)/PIXELS;
 	placed_context.beginPath();
 	board_context.beginPath();
 	for(var row = 0; row < deleteLines.length; ++row){
-		for(var r = 0; r < boardWidth; ++r){
+		for(var r = 0; r < BOARD_WIDTH; ++r){
 			placed_context.rect(ORIGIN_POS+(PIXELS*r), deleteLines[row], PIXELS, PIXELS);
 			placed_context.fillStyle = '#888888';
 			placed_context.fillRect(ORIGIN_POS+(PIXELS*r), deleteLines[row], PIXELS-ORIGIN_POS, PIXELS-ORIGIN_POS);

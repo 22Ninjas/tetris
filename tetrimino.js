@@ -232,28 +232,12 @@ Piece.prototype.checkSidesHelper = function(row, col, dir){
 }
 Piece.prototype.moveDown = function(){
 	if(this.bottom == GRID_BOTTOM){
- 		var rows = getLineRows();
-		var deleteRows = checkRowForLine(rows);
-		if(deleteRows.length != 0){
-			clearLines(deleteRows);
-			shiftDown(deleteRows);
-			updateScore(deleteRows.length);
-		}
  		return false;
  	}
 	else{
 		if(this.checkUnder()){
 			if(this.y != ORIGIN_POS){
-				var rows = getLineRows();
-				var deleteRows = checkRowForLine(rows);
-				if(deleteRows.length != 0){
-					clearLines(deleteRows);
-					shiftDown(deleteRows);
-					updateScore(deleteRows.length);
-				}
 				return false;
-				// currentPiece = nextPiece();
-				// currentPiece.draw("board");
 			}
 			else{
 				this.draw("placed");
@@ -264,8 +248,6 @@ Piece.prototype.moveDown = function(){
 		}
 		else{
 			return true;
-			// this.setBottom();
-			// this.draw("board");
 		}
 	}
 }
