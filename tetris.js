@@ -98,7 +98,7 @@ function initVars(){
 	for(var x = ORIGIN_POS; x < MAX_RIGHT-ORIGIN_POS; x+=PIXELS){
 		for(var y = ORIGIN_POS; y < GRID_BOTTOM; y+=PIXELS){
 			board_context.rect(x, y, PIXELS, PIXELS);
-			board_context.fillStyle = '#888888';
+			board_context.fillStyle = "rgba(136,136,136, .5)";
 			board_context.fillRect(x, y, PIXELS-ORIGIN_POS, PIXELS-ORIGIN_POS);
 		}
 	}
@@ -284,11 +284,11 @@ function clearLines(deleteLines){
 	for(var row = 0; row < deleteLines.length; ++row){
 		for(var r = 0; r < BOARD_WIDTH; ++r){
 			placed_context.rect(ORIGIN_POS+(PIXELS*r), deleteLines[row], PIXELS, PIXELS);
-			placed_context.fillStyle = '#888888';
+			placed_context.fillStyle = "rgba(136,136,136,0)";
 			placed_context.fillRect(ORIGIN_POS+(PIXELS*r), deleteLines[row], PIXELS-ORIGIN_POS, PIXELS-ORIGIN_POS);
 			
 			board_context.rect(ORIGIN_POS+(PIXELS*r), deleteLines[row], PIXELS, PIXELS);
-			board_context.fillStyle = '#888888';
+			board_context.fillStyle = "rgba(136,136,136,0)";
 			board_context.fillRect(ORIGIN_POS+(PIXELS*r), deleteLines[row], PIXELS-ORIGIN_POS, PIXELS-ORIGIN_POS);
 		}
 		placed_context.closePath();

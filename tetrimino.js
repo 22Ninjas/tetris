@@ -291,11 +291,14 @@ Piece.prototype.draw = function(contextBoard){
 	draw_on_context.beginPath();
 	for(var x = 0; x < this.gridSize; ++x){
 		for(var y = 0; y < this.gridSize; ++y){
+			draw_on_context.rect(this.x+(PIXELS*x), this.y+(PIXELS*y), PIXELS, PIXELS);
 			if(this.currentSet[y][x] == 1){
-				draw_on_context.rect(this.x+(PIXELS*x), this.y+(PIXELS*y), PIXELS, PIXELS);
 				draw_on_context.fillStyle = this.color;
-				draw_on_context.fillRect(this.x+(PIXELS*x), this.y+(PIXELS*y), PIXELS-ORIGIN_POS, PIXELS-ORIGIN_POS);
 			}
+			else{
+				draw_on_context.fillStyle = "rgba(136,136,136,0)";
+			}
+			draw_on_context.fillRect(this.x+(PIXELS*x), this.y+(PIXELS*y), PIXELS-ORIGIN_POS, PIXELS-ORIGIN_POS);
 		}
 	}
 	draw_on_context.closePath();
@@ -305,8 +308,9 @@ Piece.prototype.draw = function(contextBoard){
 Piece.prototype.clear = function(){
 	for(var i = 0; i < this.gridSize; ++i){
 		for(var j = 0; j < this.gridSize; ++j){
+			board_context.clearRect(this.x+(PIXELS*i), this.y+(PIXELS*j), PIXELS, PIXELS);
 			board_context.rect(this.x+(PIXELS*i), this.y+(PIXELS*j), PIXELS, PIXELS);
-			board_context.fillStyle = '#888888';
+			board_context.fillStyle = "rgba(136,136,136,0.5)";
 			board_context.fillRect(this.x+(PIXELS*i), this.y+(PIXELS*j), PIXELS, PIXELS);
 		}
 	}
