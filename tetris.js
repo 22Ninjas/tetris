@@ -68,6 +68,13 @@ function initVars(){
 						if(!currentPiece.moveDown()){
 							currentPiece.clear();
 							currentPiece.draw('placed');
+							var rows = getLineRows();
+							var deleteRows = checkRowForLine(rows);
+							if(deleteRows.length != 0){
+								clearLines(deleteRows);
+								shiftDown(deleteRows);
+								updateScore(deleteRows.length);
+							}
 							currentPiece = nextPiece();
 						}
 						else{
@@ -342,6 +349,13 @@ function pauseGame(){
 							if(!currentPiece.moveDown()){
 								currentPiece.clear();
 								currentPiece.draw('placed');
+								var rows = getLineRows();
+								var deleteRows = checkRowForLine(rows);
+								if(deleteRows.length != 0){
+									clearLines(deleteRows);
+									shiftDown(deleteRows);
+									updateScore(deleteRows.length);
+								}
 								currentPiece = nextPiece();
 							}
 							else{
@@ -369,6 +383,13 @@ function updateInterval(){
 						if(!currentPiece.moveDown()){
 							currentPiece.clear();
 							currentPiece.draw('placed');
+							var rows = getLineRows();
+							var deleteRows = checkRowForLine(rows);
+							if(deleteRows.length != 0){
+								clearLines(deleteRows);
+								shiftDown(deleteRows);
+								updateScore(deleteRows.length);
+							}
 							currentPiece = nextPiece();
 						}
 						else{
