@@ -28,10 +28,11 @@ html, body{
 	background-color: #ffffff;
 	width: 100px;
 	height: 30px;
+	text-align: center;
 }
 #score p{
 	margin-top:-15px;
-	text-align: left;
+	text-align: center;
 }
 #gameOver{
 	position: absolute;
