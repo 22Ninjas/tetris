@@ -22,8 +22,12 @@ html, body{
 	border: 1px solid #ccc;
 	display: block;
 }
-#score{
+#stats-container{
 	display: inline-block;
+	width: 100px;
+	height: 130px;
+}
+#score{
 	padding-top: 25px;
 	vertical-align: top;
 	background-color: #ffffff;
@@ -34,6 +38,15 @@ html, body{
 #score p{
 	margin-top:-15px;
 	text-align: center;
+}
+#nextpiece-container{
+	background-color: #cccccc;
+	width: 100px;
+	height: 100px;
+}
+#nextpiece{
+	display: block;
+	background-color: rgba(128,128,128,.5);
 }
 #gameOver{
 	position: absolute;

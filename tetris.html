@@ -18,12 +18,16 @@
 			<button id="reset">New Game</button>
 		</div>
 		<canvas id="tetrisboard" style="border: 1px solid black; z-index: 2; position: absolute; top=0; left=0;" width="300" height="600"></canvas>
-		<canvas id="board" style="boarder: 1px solid black; z-index: 3; position: absolute; top=0; left=0;" width="300" height="600"></canvas>
+		<canvas id="board" style="border: 1px solid black; z-index: 3; position: absolute; top=0; left=0;" width="300" height="600"></canvas>
 	</div>
-	<div id="score">
-		<p>SCORE:</p>
+	<div id="stats-container">
+		<div id="score">
+			<p>SCORE:</p>
+		</div>
+		<div id="nextpiece-container">
+			<canvas id="nextpiece" width="100" height="100" style="top=0; left=0;"></canvas>
+		</div>
 	</div>
-	
 </div>
 </body>
 </html>

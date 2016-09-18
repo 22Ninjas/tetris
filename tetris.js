@@ -34,8 +34,8 @@ var UNPLAYED_PIECES = [
 	@placed_board - canvas associated with #board
 	@placed_context - context for @placed_board where the set pieces will be drawn
 */
-var board, board_context, placed_board, placed_context;
-var currentPiece; //current piece being played
+var board, board_context, placed_board, placed_context, next_board, next_context;
+var currentPiece, nextPiece; //current piece being played
 var paused; 	  //boolean status of whether game is paused or not (true = paused, false = unpaused)
 var intervalSpeed;//the frequency of how often moveDown() is called to auto drop a piece
 var moveDownTimer;//setInterval object to call the moveDown() method to drop the piece
@@ -64,6 +64,8 @@ function initVars(){
 	intervalSpeed = 1000;
 	gameEnd = false;
 	score = 0;
+	currentPiece = getNextPiece();
+	nextPiece = getNextPiece();
 	moveDownTimer = setInterval(function(){
 						if(!currentPiece.moveDown()){
 							currentPiece.clear();
@@ -75,7 +77,9 @@ function initVars(){
 								shiftDown(deleteRows);
 								updateScore(deleteRows.length);
 							}
-							currentPiece = nextPiece();
+							currentPiece = nextPiece;
+							nextPiece = getNextPiece();
+							drawNext();
 						}
 						else{
 							currentPiece.clear();
@@ -86,6 +90,7 @@ function initVars(){
 					}, intervalSpeed);
 	var scoreText = '<p>'+score+'</p>';
 	$('#score').append(scoreText);
+
 	board = document.getElementById('tetrisboard');
 	board_context = board.getContext('2d');
 	board_context.beginPath();
@@ -99,6 +104,13 @@ function initVars(){
 	placed_context.rect(0, 0, $('#board').width(), $('#board').height());
 	placed_context.closePath();
 	placed_context.stroke();
+
+	next_board = document.getElementById('nextpiece');
+	next_context = next_board.getContext('2d');
+	next_context.beginPath();
+	next_context.rect(0, 0, $('#nextpiece').width(), $('#nextpiece').height());
+	next_context.closePath();
+	next_context.stroke();
 	
 	board_context.beginPath();
 	
@@ -112,6 +124,18 @@ function initVars(){
 	board_context.closePath();
 	board_context.strokeStyle = '#000000';
 	board_context.stroke();
+
+	next_context.beginPath();
+	for(var x = 0; x < 100; x+=20){
+		for(var y = 0; y < 100; y+=20){
+			next_context.rect(x, y, 20, 20);
+			next_context.fillStyle = "rgba(136,136,136,.5)";
+			next_context.fillRect(x, y, 20, 20);
+		}
+	}
+	next_context.closePath();
+	next_context.strokeStyle = '#000000';
+	next_context.stroke();
 }
 /**
 	startGame function
@@ -119,15 +143,15 @@ function initVars(){
 */
 function startGame(){
 	initVars();
-	currentPiece = nextPiece();
 	currentPiece.draw('board');
+	drawNext();
 }
 /**
 	nextPiece function
 	randomly selects a piece to play
 	NEXT_PIECE_ARRAY/UNPLAYED_PIECES array guarantees that each piece is played at least 4 times per 28
 */
-function nextPiece(){
+function getNextPiece(){
 	var newPiece;
 	if(UNPLAYED_PIECES == 0){
 		UNPLAYED_PIECES = new Array(NEXT_PIECE_ARRAY.length);
@@ -142,35 +166,29 @@ function nextPiece(){
 	switch(nextPiece){
 		case 'i':
 			newPiece = new I();
-			return newPiece;
 			break;
 		case 'j':
 			newPiece = new J();
-			return newPiece;
 			break;
 		case 'l':
 			newPiece = new L();
-			return newPiece;
 			break;
 		case 't':
 			newPiece = new T();
-			return newPiece;
 			break;
 		case 'o':
 			newPiece = new O();
-			return newPiece;
 			break;
 		case 's':
 			newPiece = new S();
-			return newPiece;
 			break;
 		case 'z':
 			newPiece = new Z();
-			return newPiece;
 			break;
 		default:
 			throw 'Error: could not retrieve next piece';
 	}
+	return newPiece;
 }
 
 //listen for key presses and call respective methods
@@ -205,7 +223,9 @@ $(function(){
 						shiftDown(deleteRows);
 						updateScore(deleteRows.length);
 					}
-					currentPiece = nextPiece();
+					currentPiece = nextPiece;
+					nextPiece = getNextPiece();
+					drawNext();
 				}
 				else{
 					currentPiece.clear();
@@ -318,6 +338,36 @@ function shiftDown(deletedRows){
 	}
 }
 /**
+	drawnext function
+	draw the next piece in the 'next piece' area to show the next piecee to be played.
+*/
+function drawNext(){
+	// next_context.clearRect(0, 0, $('#nextpiece').width(), $('#nextpiece').height());
+	var gridSize = nextPiece.gridSize;
+	next_context.beginPath();
+	for(var x = 0; x < 5; ++x){
+		for(var y = 0; y < 5; ++y){
+			if(x < gridSize && y < gridSize){
+				next_context.rect(20*(x+Math.floor((5-gridSize)/2))*x, 20*(y+Math.floor((5-gridSize)/2))*y, 20, 20);
+				if(nextPiece.currentSet[y][x] == 1){
+					next_context.fillStyle = nextPiece.color;
+				}
+				else{
+					next_context.fillStyle = "rgba(136,136,136,0)";
+				}
+				next_context.fillRect(20*(x+Math.floor((5-gridSize)/2)), 20*(y+Math.floor((5-gridSize)/2)), 20-.5, 20-.5);
+			}
+			else{
+				next_context.fillStyle = "rgba(136,136,136,0)";
+				next_context.fillRect(20*x, 20*y, 20-.5, 20-.5);
+			}
+		}
+	}
+	next_context.closePath();
+	next_context.strokeStyle = "#000000";
+	next_context.stroke();
+}
+/**
 	updateScore function
 	add to score after clearing lines
 	1 line = 1 pt
@@ -356,7 +406,9 @@ function pauseGame(){
 									shiftDown(deleteRows);
 									updateScore(deleteRows.length);
 								}
-								currentPiece = nextPiece();
+								currentPiece = nextPiece;
+								nextPiece = getNextPiece();
+								drawNext();
 							}
 							else{
 								currentPiece.clear();
@@ -390,7 +442,9 @@ function updateInterval(){
 								shiftDown(deleteRows);
 								updateScore(deleteRows.length);
 							}
-							currentPiece = nextPiece();
+							currentPiece = nextPiece;
+							nextPiece = getNextPiece();
+							drawNext();
 						}
 						else{
 							currentPiece.clear();							
